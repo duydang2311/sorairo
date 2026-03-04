@@ -2,9 +2,8 @@ mod player;
 
 use std::time::Duration;
 
-use eframe::egui::{
-    self, Color32, CornerRadius, ProgressBar, Rect, Sense, Shadow, Stroke, style::HandleShape, vec2,
-};
+use eframe::egui::{self, Color32, CornerRadius, Rect, RichText, Sense, Shadow, Stroke, Ui, vec2};
+use egui_extras::{Column, TableBuilder};
 use player::{PlayerState, SorairoPlayer};
 
 #[derive(Default)]
@@ -15,16 +14,38 @@ struct Sorairo {
 
 impl eframe::App for Sorairo {
     fn update(&mut self, ctx: &eframe::egui::Context, frame: &mut eframe::Frame) {
+        let playlist_size = self.player.playlist.len();
+        if playlist_size > 0
+            && let PlayerState::Loaded(loaded) = &self.player.state
+        {
+            if loaded.player.empty() {
+                self.player.current_index = (self.player.current_index + 1) % playlist_size;
+                self.player.play();
+            }
+        }
         egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
             egui::MenuBar::new().ui(ui, |ui| {
                 ui.menu_button("File", |ui| {
                     if ui.button("Open").clicked()
-                        && let Some(path) = rfd::FileDialog::new().pick_file()
+                        && let Some(path) = rfd::FileDialog::new()
+                            .add_filter("audio", &["mp3", "wav"])
+                            .pick_file()
                     {
                         let path = path.display().to_string();
                         self.player.clear();
-                        self.player.play(&path);
+                        self.player.add_file(path.clone());
+                        self.player.play();
                         self.file_path = Some(path);
+                    }
+                    ui.separator();
+                    if ui.button("Add files").clicked()
+                        && let Some(paths) = rfd::FileDialog::new()
+                            .add_filter("audio", &["mp3", "wav"])
+                            .pick_files()
+                    {
+                        for path in &paths {
+                            self.player.add_file(path.display().to_string());
+                        }
                     }
                     if ui.button("Quit").clicked() {
                         ui.ctx().send_viewport_cmd(egui::ViewportCommand::Close);
@@ -32,11 +53,8 @@ impl eframe::App for Sorairo {
                 });
             })
         });
-        egui::CentralPanel::default().show(ctx, |ui| {
-            if let Some(path) = &self.file_path {
-                ui.label(path);
-            }
-            if let PlayerState::Loaded(loaded) = self.player.get_state() {
+        egui::TopBottomPanel::bottom("bottom_panel").show(ctx, |ui| {
+            if let PlayerState::Loaded(loaded) = &self.player.state {
                 if !loaded.player.is_paused() {
                     ctx.request_repaint_after(Duration::from_millis(33));
                 }
@@ -85,20 +103,20 @@ impl eframe::App for Sorairo {
                         self.player.seek(new_time);
                     }
                 }
-                if ui
-                    .button(match loaded.player.is_paused() {
-                        true => "Resume",
-                        false => "Pause",
-                    })
-                    .clicked()
-                {
-                    match loaded.player.is_paused() {
-                        true => self.player.resume(),
-                        false => self.player.pause(),
-                    };
-                }
-
             }
+            if !self.player.playlist.is_empty() {
+                if let PlayerState::Loaded(loaded) = &self.player.state {
+                    match loaded.player.is_paused() || loaded.player.empty() {
+                        true => draw_play_button(ui, self),
+                        false => draw_pause_button(ui, self),
+                    }
+                } else {
+                    draw_play_button(ui, self);
+                }
+            }
+        });
+        egui::CentralPanel::default().show(ctx, |ui| {
+            draw_playlist_table(ui, self);
         });
     }
 }
@@ -184,4 +202,125 @@ fn replace_fonts(ctx: &egui::Context) {
             Color32::from_hex("#323232").expect("hex must be valid"),
         );
     });
+}
+
+fn draw_play_button(ui: &mut Ui, app: &mut Sorairo) {
+    let desired_size = egui::vec2(20.0, 20.0);
+
+    let (rect, response) = ui.allocate_exact_size(desired_size, egui::Sense::click());
+
+    let visuals = ui.style().interact(&response);
+    if response.hovered() {
+        ui.painter().rect(
+            rect,
+            2.0,
+            visuals.bg_fill,
+            visuals.bg_stroke,
+            egui::StrokeKind::Outside,
+        );
+    } else {
+        ui.painter().rect(
+            rect,
+            2.0,
+            visuals.bg_fill,
+            visuals.bg_stroke,
+            egui::StrokeKind::Outside,
+        );
+    }
+
+    let center = rect.center();
+    let w = rect.width() * 0.4;
+    let h = rect.height() * 0.5;
+
+    let points = vec![
+        egui::pos2(center.x - w * 0.5, center.y - h * 0.5),
+        egui::pos2(center.x - w * 0.5, center.y + h * 0.5),
+        egui::pos2(center.x + w * 0.5, center.y),
+    ];
+
+    ui.painter().add(egui::Shape::convex_polygon(
+        points,
+        visuals.fg_stroke.color,
+        egui::Stroke::NONE,
+    ));
+
+    if response.clicked() {
+        if app.player.empty() {
+            app.player.play();
+        } else {
+            app.player.resume();
+        }
+    }
+}
+fn draw_pause_button(ui: &mut Ui, app: &Sorairo) {
+    let size = egui::vec2(20.0, 20.0);
+    let (rect, response) = ui.allocate_exact_size(size, egui::Sense::click());
+    let visuals = ui.style().interact(&response);
+    ui.painter().rect(
+        rect,
+        2.0,
+        visuals.bg_fill,
+        visuals.bg_stroke,
+        egui::StrokeKind::Outside,
+    );
+
+    let painter = ui.painter();
+    let center = rect.center();
+    let bar_width = rect.width() * 0.18;
+    let bar_height = rect.height() * 0.5;
+    let spacing = rect.width() * 0.08;
+
+    let left_rect = egui::Rect::from_center_size(
+        egui::pos2(center.x - spacing - bar_width * 0.5, center.y),
+        egui::vec2(bar_width, bar_height),
+    );
+
+    let right_rect = egui::Rect::from_center_size(
+        egui::pos2(center.x + spacing + bar_width * 0.5, center.y),
+        egui::vec2(bar_width, bar_height),
+    );
+
+    painter.rect_filled(left_rect, 2.0, visuals.fg_stroke.color);
+    painter.rect_filled(right_rect, 2.0, visuals.fg_stroke.color);
+
+    if response.clicked() {
+        app.player.pause();
+    }
+}
+
+fn draw_playlist_table(ui: &mut Ui, app: &mut Sorairo) {
+    TableBuilder::new(ui)
+        .sense(Sense::click())
+        .column(Column::auto().at_least(28.0)) // column 1
+        .column(Column::remainder()) // column 2 (takes remaining space)
+        .header(20.0, |mut header| {
+            header.col(|ui| {
+                ui.weak("#");
+            });
+            header.col(|ui| {
+                ui.weak("Title");
+            });
+        })
+        .body(|body| {
+            body.rows(18.0, app.player.playlist.len(), |mut row| {
+                let idx = row.index();
+                let selected = app.player.current_index == idx;
+                row.set_selected(selected);
+                row.col(|ui| {
+                    ui.weak((idx + 1).to_string());
+                });
+                row.col(|ui| {
+                    let mut rich_text = RichText::new(&app.player.playlist[idx]);
+                    if selected {
+                        rich_text = rich_text.strong();
+                    }
+                    ui.label(rich_text);
+                });
+                if row.response().clicked() {
+                    app.player.current_index = idx;
+                    app.player.stop();
+                    app.player.play();
+                }
+            });
+        });
 }

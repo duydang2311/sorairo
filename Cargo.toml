@@ -5,6 +5,8 @@ edition = "2024"
 
 [dependencies]
 eframe = { version = "0.33.3", features = ["default"] }
+egui_extras = "0.33.3"
 env_logger = { version = "0.11.9", features = ["auto-color", "humantime"] }
+lofty = "0.23.2"
 rfd = "0.17.2"
 rodio = { version = "0.22.1", features = ["default"] }

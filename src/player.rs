@@ -9,13 +9,16 @@ use std::{
     time::Duration,
 };
 
+use lofty::{file::TaggedFileExt, read_from_path, tag::ItemKey};
 use rodio::{
     ChannelCount, Decoder, MixerDeviceSink, Player, SampleRate, Source, source::SeekError,
 };
 
 #[derive(Default)]
 pub struct SorairoPlayer {
-    state: PlayerState,
+    pub state: PlayerState,
+    pub playlist: Vec<String>,
+    pub current_index: usize,
 }
 
 pub enum PlayerState {
@@ -89,12 +92,25 @@ where
 }
 
 impl SorairoPlayer {
-    pub fn get_state(&self) -> &PlayerState {
-        &self.state
+    pub fn add_file(&mut self, path: String) {
+        self.playlist.push(path);
     }
 
-    pub fn play(&mut self, path: &str) {
+    pub fn play(&mut self) {
+        let playlist_size = self.playlist.len();
+        if playlist_size == 0 {
+            return;
+        }
+        let path = &self.playlist[self.current_index];
         let file = File::open(path).unwrap();
+        let tagged = read_from_path(path).unwrap();
+        if let Some(tag) = tagged.primary_tag() {
+            let artist = tag.get_string(ItemKey::TrackArtist);
+            let title = tag.get_string(ItemKey::TrackTitle);
+
+            println!("Artist: {:?}", artist);
+            println!("Title: {:?}", title);
+        }
         let source = Decoder::try_from(file).unwrap();
         let progress = Arc::new(AtomicU64::new(0));
         let loaded = match std::mem::replace(&mut self.state, PlayerState::Idle) {
@@ -133,6 +149,8 @@ impl SorairoPlayer {
     }
 
     pub fn clear(&mut self) {
+        self.playlist.clear();
+        self.current_index = 0;
         match &self.state {
             PlayerState::Idle => {}
             PlayerState::Loaded(loaded) => {
@@ -174,6 +192,13 @@ impl SorairoPlayer {
         }
     }
 
+    pub fn stop(&self) {
+        match &self.state {
+            PlayerState::Idle => {}
+            PlayerState::Loaded(loaded) => loaded.player.stop(),
+        }
+    }
+
     pub fn pause(&self) {
         match &self.state {
             PlayerState::Idle => {}
@@ -192,6 +217,13 @@ impl SorairoPlayer {
                         eprintln!("{}", e);
                     });
             }
+        }
+    }
+
+    pub fn empty(&self) -> bool {
+        match &self.state {
+            PlayerState::Idle => true,
+            PlayerState::Loaded(loaded) => loaded.player.empty(),
         }
     }
 }
