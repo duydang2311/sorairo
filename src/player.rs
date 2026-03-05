@@ -1,7 +1,8 @@
 use std::{
     fs::File,
     io::{Read, Seek},
-    num::NonZero,
+    num::{NonZero, NonZeroU32},
+    path::Path,
     sync::{
         Arc,
         atomic::{AtomicU64, Ordering},
@@ -17,8 +18,15 @@ use rodio::{
 #[derive(Default)]
 pub struct SorairoPlayer {
     pub state: PlayerState,
-    pub playlist: Vec<String>,
-    pub current_index: usize,
+    pub playlist: Vec<PlaylistItem>,
+    current_index: Option<usize>,
+}
+
+pub struct PlaylistItem {
+    pub path: String,
+    pub file_name: String,
+    pub artist: Option<String>,
+    pub title: Option<String>,
 }
 
 pub enum PlayerState {
@@ -93,17 +101,45 @@ where
 
 impl SorairoPlayer {
     pub fn add_file(&mut self, path: String) {
-        self.playlist.push(path);
+        let tagged_file = read_from_path(&path).unwrap();
+        let primary_tag = tagged_file.primary_tag();
+        let file_name = Path::new(&path)
+            .file_name()
+            .and_then(|a| a.to_str())
+            .expect("path must be valid")
+            .to_owned();
+        self.playlist.push(PlaylistItem {
+            path,
+            file_name,
+            artist: primary_tag
+                .and_then(|a| a.get_string(ItemKey::TrackArtist).map(|a| a.to_owned())),
+            title: primary_tag
+                .and_then(|a| a.get_string(ItemKey::TrackTitle).map(|a| a.to_owned())),
+        });
+    }
+
+    pub fn set_current(&mut self, index: Option<usize>) {
+        if let Some(i) = index {
+            if i >= self.playlist.len() {
+                return;
+            }
+        }
+        self.current_index = index;
+    }
+
+    pub fn get_current(&self) -> Option<usize> {
+        self.current_index
     }
 
     pub fn play(&mut self) {
-        let playlist_size = self.playlist.len();
-        if playlist_size == 0 {
+        let Some(item) = self
+            .current_index
+            .and_then(|index| self.playlist.get(index))
+        else {
             return;
-        }
-        let path = &self.playlist[self.current_index];
-        let file = File::open(path).unwrap();
-        let tagged = read_from_path(path).unwrap();
+        };
+        let file = File::open(&item.path).unwrap();
+        let tagged = read_from_path(&item.path).unwrap();
         if let Some(tag) = tagged.primary_tag() {
             let artist = tag.get_string(ItemKey::TrackArtist);
             let title = tag.get_string(ItemKey::TrackTitle);
@@ -150,13 +186,8 @@ impl SorairoPlayer {
 
     pub fn clear(&mut self) {
         self.playlist.clear();
-        self.current_index = 0;
-        match &self.state {
-            PlayerState::Idle => {}
-            PlayerState::Loaded(loaded) => {
-                loaded.player.clear();
-            }
-        };
+        self.current_index = None;
+        self.state = PlayerState::Idle;
     }
 
     pub fn get_elapsed_secs(&self) -> f64 {
