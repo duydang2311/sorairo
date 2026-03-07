@@ -161,6 +161,7 @@ fn main() -> eframe::Result {
         viewport: egui::ViewportBuilder::default()
             .with_inner_size([640.0, 480.0])
             .with_min_inner_size([640.0, 480.0]),
+        vsync: true,
         ..Default::default()
     };
 
