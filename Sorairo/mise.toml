@@ -1,0 +1,6 @@
+[settings]
+disable_tools = ["dotnet"]
+
+[tasks.publish]
+description = "Publish the application"
+run = "dotnet publish -c Release --self-contained -r win-x64 /p:PublishReadyToRun=true /p:PublishTrimmed=True /p:TrimMode=partial /p:DebugType=None /p:DebugSymbols=false"
