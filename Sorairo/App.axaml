@@ -1,0 +1,107 @@
+<Application xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    x:Class="Sorairo.App"
+    xmlns:ui="clr-namespace:Sorairo.Common.UI"
+    RequestedThemeVariant="Default">
+    <Application.Styles>
+        <SimpleTheme />
+        <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Simple.xaml" />
+
+        <Style Selector="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource FgBrush}" />
+        </Style>
+        <Style Selector="DataGridRow">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="{DynamicResource FgBrush}" />
+        </Style>
+        <Style Selector="DataGridCell /template/ Border#CellBorder">
+            <Setter Property="Padding" Value="0,4" />
+        </Style>
+        <Style Selector="DataGridRow /template/ Rectangle#BackgroundRectangle">
+            <Setter Property="IsVisible" Value="False" />
+            <Setter Property="Fill" Value="Transparent" />
+        </Style>
+        <Style Selector="DataGridRow:pointerover /template/ Rectangle#BackgroundRectangle">
+            <Setter Property="IsVisible" Value="True" />
+            <Setter Property="Fill" Value="{DynamicResource SurfaceSubtleBrush}" />
+            <Setter Property="Opacity" Value="1" />
+        </Style>
+        <Style Selector="DataGridRow:selected">
+            <Setter Property="Foreground" Value="{DynamicResource FgBrush}" />
+        </Style>
+        <Style Selector="DataGridRow:selected /template/ Rectangle#BackgroundRectangle">
+            <Setter Property="IsVisible" Value="True" />
+            <Setter Property="Fill" Value="{DynamicResource SurfaceSubtleBrush}" />
+            <Setter Property="Opacity" Value="1" />
+        </Style>
+        <Style Selector="DataGridRow.active /template/ Rectangle#BackgroundRectangle">
+            <Setter Property="IsVisible" Value="True" />
+            <Setter Property="Fill" Value="{DynamicResource SurfaceEmphBrush}" />
+            <Setter Property="Opacity" Value="1" />
+        </Style>
+        <Style Selector="DataGridRow.active">
+            <Setter Property="Foreground" Value="{DynamicResource FgEmphBrush}" />
+        </Style>
+
+        <Style Selector="DataGridColumnHeader">
+            <Setter Property="Background" Value="{DynamicResource SurfaceSubtleBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource SurfaceBorderBrush}" />
+            <Setter Property="SeparatorBrush" Value="{DynamicResource SurfaceBorderBrush}" />
+            <Setter Property="BorderThickness" Value="0,0,0,1" />
+        </Style>
+        <Style Selector="DataGrid">
+            <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource SurfaceBorderBrush}" />
+        </Style>
+        <Style Selector="Slider /template/ Border">
+            <Setter Property="CornerRadius" Value="4" />
+        </Style>
+    </Application.Styles>
+
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <MergeResourceInclude Source="avares://Sorairo/Common/UI/Styles/Button.axaml" />
+                <MergeResourceInclude Source="avares://Sorairo/Common/UI/Styles/Slider.axaml" />
+                <MergeResourceInclude Source="avares://Sorairo/Common/UI/Styles/Menu.axaml" />
+                <MergeResourceInclude Source="avares://Sorairo/Common/UI/Styles/MenuItem.axaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <ResourceDictionary.ThemeDictionaries>
+                <ResourceDictionary x:Key="Default">
+                    <SolidColorBrush x:Key="SurfaceBrush" Color="{x:Static ui:LightColors.Surface}" />
+                    <SolidColorBrush x:Key="SurfaceSubtleBrush"
+                        Color="{x:Static ui:LightColors.SurfaceSubtle}" />
+                    <SolidColorBrush x:Key="SurfaceEmphBrush"
+                        Color="{x:Static ui:LightColors.SurfaceEmph}" />
+                    <SolidColorBrush x:Key="SurfaceBorderBrush"
+                        Color="{x:Static ui:LightColors.SurfaceBorder}" />
+
+                    <SolidColorBrush x:Key="FgBrush" Color="{x:Static ui:LightColors.Fg}" />
+                    <SolidColorBrush x:Key="FgSubtleBrush"
+                        Color="{x:Static ui:LightColors.FgSubtle}" />
+                    <SolidColorBrush x:Key="FgEmphBrush" Color="{x:Static ui:LightColors.FgEmph}" />
+                    <SolidColorBrush x:Key="FgMutedBrush" Color="{x:Static ui:LightColors.FgMuted}" />
+
+                    <SolidColorBrush x:Key="BaseBrush" Color="{x:Static ui:LightColors.Base}" />
+                    <SolidColorBrush x:Key="BaseSubtleBrush"
+                        Color="{x:Static ui:LightColors.BaseSubtle}" />
+                    <SolidColorBrush x:Key="BaseEmphBrush"
+                        Color="{x:Static ui:LightColors.BaseEmph}" />
+                    <SolidColorBrush x:Key="BaseBorderBrush"
+                        Color="{x:Static ui:LightColors.BaseBorder}" />
+
+                    <SolidColorBrush x:Key="PrimaryBrush" Color="{x:Static ui:LightColors.Primary}" />
+                    <SolidColorBrush x:Key="PrimaryFgBrush"
+                        Color="{x:Static ui:LightColors.PrimaryFg}" />
+                    <SolidColorBrush x:Key="PrimarySubtleBrush"
+                        Color="{x:Static ui:LightColors.PrimarySubtle}" />
+                    <SolidColorBrush x:Key="PrimaryEmphBrush"
+                        Color="{x:Static ui:LightColors.PrimaryEmph}" />
+                </ResourceDictionary>
+                <ResourceDictionary x:Key="Dark">
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
+
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

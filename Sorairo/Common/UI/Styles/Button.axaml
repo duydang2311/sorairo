@@ -1,0 +1,67 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  x:ClassModifier="internal">
+  <ControlTheme x:Key="{x:Type Button}"
+    TargetType="Button">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Foreground" Value="{DynamicResource FgBrush}" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="Padding" Value="4" />
+    <Setter Property="CornerRadius" Value="4" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border Name="PART_Border"
+          Background="{TemplateBinding Background}"
+          BorderBrush="{TemplateBinding BorderBrush}"
+          BorderThickness="{TemplateBinding BorderThickness}"
+          CornerRadius="{TemplateBinding CornerRadius}">
+          <ContentPresenter Name="PART_ContentPresenter"
+            Padding="{TemplateBinding Padding}"
+            HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+            VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+            Content="{TemplateBinding Content}"
+            ContentTemplate="{TemplateBinding ContentTemplate}"
+            TextElement.Foreground="{TemplateBinding Foreground}" />
+        </Border>
+      </ControlTemplate>
+    </Setter>
+
+    <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="RecognizesAccessKey" Value="True" />
+    </Style>
+
+    <Style Selector="^.outlined">
+      <Setter Property="BorderBrush" Value="{DynamicResource BaseBorderBrush}" />
+      <Setter Property="BorderThickness" Value="1" />
+    </Style>
+    <Style Selector="^.filled">
+      <Setter Property="Background" Value="{DynamicResource BaseBrush}" />
+    </Style>
+    <Style Selector="^:pointerover">
+      <Setter Property="Foreground" Value="{DynamicResource FgEmphBrush}" />
+      <Setter Property="Background" Value="{DynamicResource BaseSubtleBrush}" />
+    </Style>
+    <Style Selector="^:pressed">
+      <Setter Property="Background" Value="{DynamicResource BaseEmphBrush}" />
+    </Style>
+
+    <Style Selector="^.primary">
+      <Setter Property="Foreground" Value="{DynamicResource PrimaryFgBrush}" />
+      <Style Selector="^.filled">
+        <Setter Property="Foreground" Value="{DynamicResource FgEmphBrush}" />
+        <Setter Property="Background" Value="{DynamicResource PrimaryBrush}" />
+      </Style>
+      <Style Selector="^:pointerover">
+        <Setter Property="Background" Value="{DynamicResource PrimarySubtleBrush}" />
+      </Style>
+      <Style Selector="^:pressed">
+        <Setter Property="Background" Value="{DynamicResource PrimaryEmphBrush}" />
+      </Style>
+    </Style>
+
+    <Style Selector="^:disabled">
+      <Setter Property="Opacity" Value="{DynamicResource ThemeDisabledOpacity}" />
+    </Style>
+  </ControlTheme>
+</ResourceDictionary>
