@@ -17,5 +17,6 @@ class Program
             .Configure<App>()
             .UsePlatformDetect()
             .LogToDelegate(Console.WriteLine)
+            .WithInterFont()
             .LogToTrace();
 }
