@@ -2,7 +2,7 @@
 
 A minimal, local, cross-platform music player built with Avalonia and miniaudio.
 
-[Sorairo Overview](docs/demo.gif)
+![Sorairo](docs/demo.gif "Sorairo overview demo")
 
 ## Roadmap
 
