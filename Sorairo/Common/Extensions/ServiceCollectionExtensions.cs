@@ -1,10 +1,10 @@
-using Sorairo;
 using Sorairo.Common.Interfaces;
 using Sorairo.Common.Models;
 using Sorairo.Common.Services;
 using Sorairo.Features.MainMenu;
 using Sorairo.Features.NowPlaying;
 using Sorairo.Features.Playlist;
+using Sorairo.Features.Shell;
 using Sorairo.Features.StatusBar;
 
 #pragma warning disable IDE0130 // Namespace does not match folder structure
@@ -26,8 +26,8 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddMainWindow(this IServiceCollection services)
     {
-        services.AddTransient<MainWindow>();
-        services.AddTransient<MainWindowViewModel>();
+        services.AddTransient<ShellWindow>();
+        services.AddTransient<ShellWindowViewModel>();
         return services;
     }
 

@@ -3,6 +3,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
 using Microsoft.Extensions.DependencyInjection;
+using Sorairo.Features.Shell;
 
 namespace Sorairo;
 
@@ -27,7 +28,7 @@ public partial class App : Application
             .BuildServiceProvider();
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            desktop.MainWindow = serviceProvider.GetRequiredService<MainWindow>();
+            desktop.MainWindow = serviceProvider.GetRequiredService<ShellWindow>();
         }
 
         base.OnFrameworkInitializationCompleted();

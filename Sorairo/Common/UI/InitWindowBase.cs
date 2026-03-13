@@ -2,9 +2,9 @@ using Avalonia.Controls;
 
 namespace Sorairo.Common.UI;
 
-public abstract class WindowBase : Window
+public abstract class InitWindowBase : Window
 {
-    public WindowBase()
+    public InitWindowBase()
     {
         Init();
     }

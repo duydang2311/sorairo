@@ -1,6 +1,6 @@
 namespace Sorairo.Common.UI;
 
-public abstract class LifecycleWindowBase : WindowBase
+public abstract class LifecycleWindowBase : InitWindowBase
 {
     private Action? cleanup;
 

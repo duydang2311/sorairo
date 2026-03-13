@@ -1,4 +1,3 @@
-using System.ComponentModel;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data;
@@ -13,15 +12,15 @@ using Sorairo.Features.MainMenu;
 using Sorairo.Features.NowPlaying;
 using Sorairo.Features.Playlist;
 
-namespace Sorairo;
+namespace Sorairo.Features.Shell;
 
-public sealed class MainWindow(
+public sealed class ShellWindow(
     MainMenuView mainMenuView,
     IServiceProvider serviceProvider,
     AppState appState,
     NowPlayingView nowPlayingView,
-    MainWindowViewModel vm
-) : LifecycleWindowBase
+    ShellWindowViewModel vm
+) : InitWindowBase
 {
     protected override void Init()
     {
@@ -41,28 +40,10 @@ public sealed class MainWindow(
         Content = CreateContent();
     }
 
-    protected override Action WhenOpened()
-    {
-        return () => { };
-    }
-
-    private ContentControl? mainContentControl;
-
     private Border CreateContent()
     {
-        mainContentControl ??= new ContentControl();
-        this
-        // .Style(
-        //     new Style(a => a.OfType<NowPlayingView>())
-        //     {
-        //         Setters =
-        //         {
-        //             // new Setter(MinWidthProperty, 400.0),
-        //             new Setter(MaxWidthProperty, 600.0),
-        //         },
-        //     }
-        // )
-        .Style(
+        var mainContentControl = new ContentControl();
+        this.Style(
             new Style(a => a.OfType<MainMenuView>())
             {
                 Setters = { new Setter(VerticalAlignmentProperty, VerticalAlignment.Center) },
@@ -207,46 +188,4 @@ public sealed class MainWindow(
             new Binding(nameof(OffScreenMargin), BindingMode.OneWay) { Source = this }
         );
     }
-}
-
-public sealed partial class MainWindowViewModel(AppState appState) : ViewModelBase, IDisposable
-{
-    protected override void Init()
-    {
-        appState.PropertyChanged += OnAppStatePropertyChanged;
-    }
-
-    public PlaylistVisibility PlaylistVisibility =>
-        (appState.MainView == AppMainView.Playlist, appState.Viewport >= Viewport.Large) switch
-        {
-            (true, true) => PlaylistVisibility.VisibleAsPanel,
-            (true, false) => PlaylistVisibility.VisibleAsOverlay,
-            _ => PlaylistVisibility.Invisible,
-        };
-
-    public bool IsPlaylistVisbleAsOverlay =>
-        appState.MainView == AppMainView.Playlist && appState.Viewport < Viewport.Large;
-
-    private void OnAppStatePropertyChanged(object? sender, PropertyChangedEventArgs e)
-    {
-        if (
-            e.PropertyName == nameof(AppState.MainView)
-            || e.PropertyName == nameof(AppState.Viewport)
-        )
-        {
-            OnPropertyChanged(nameof(PlaylistVisibility));
-        }
-    }
-
-    public void Dispose()
-    {
-        appState.PropertyChanged -= OnAppStatePropertyChanged;
-    }
-}
-
-public enum PlaylistVisibility
-{
-    Invisible,
-    VisibleAsPanel,
-    VisibleAsOverlay,
 }
