@@ -29,6 +29,16 @@ public sealed class ShellWindow(
                 .Bind(appState, a => a.WindowWidth, WidthProperty)
                 .Mode(BindingMode.OneWayToSource)
         );
+        this.Bind(
+            FluentBinding
+                .Bind(vm, vm => vm.WindowState, WindowStateProperty)
+                .Mode(BindingMode.OneWayToSource)
+        );
+        this.Bind(
+            FluentBinding
+                .Bind(vm, vm => vm.OffscreenMargin, OffScreenMarginProperty)
+                .Mode(BindingMode.OneWayToSource)
+        );
         MinWidth = 320;
         Width = 960;
         Height = 720;
@@ -79,21 +89,7 @@ public sealed class ShellWindow(
                     }
                         .Dock(Dock.Top)
                         .BindResource(BorderBrushProperty, "SurfaceBorderBrush")
-                        .Bind(
-                            FluentBinding
-                                .OneWay(this, a => a.RenderScaling, PaddingProperty)
-                                .Convert(scale => new Thickness(0, 0, 138 * scale, 0))
-                        )
-                        .Bind(
-                            FluentBinding
-                                .OneWay(this, a => a.OffScreenMargin, PaddingProperty)
-                                .Convert(thickness => new Thickness(
-                                    Math.Max(16, thickness.Left),
-                                    0,
-                                    thickness.Right + 138 + 16, // 138 for windows decorations, fixed size for now
-                                    0
-                                ))
-                        )
+                        .Bind(FluentBinding.OneWay(vm, vm => vm.WindowPadding, PaddingProperty))
                         .Bind(
                             FluentBinding
                                 .OneWay(this, a => a.OffScreenMargin, HeightProperty)
