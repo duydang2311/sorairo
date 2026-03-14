@@ -18,5 +18,6 @@ class Program
             .UsePlatformDetect()
             .LogToDelegate(Console.WriteLine)
             .WithInterFont()
-            .LogToTrace();
+            .LogToTrace()
+            .UseR3();
 }

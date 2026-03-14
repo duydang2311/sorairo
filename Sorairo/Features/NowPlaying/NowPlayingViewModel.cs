@@ -23,7 +23,7 @@ public sealed partial class NowPlayingViewModel(
     private bool isSeeking;
 
     [RelayCommand]
-    private void PauseOrResume()
+    private void TogglePlayback()
     {
         switch (audioState.Status)
         {
@@ -63,6 +63,18 @@ public sealed partial class NowPlayingViewModel(
     private void Seek(double seconds)
     {
         audioService.Seek(TimeSpan.FromSeconds(seconds));
+    }
+
+    [RelayCommand]
+    private void ToggleShuffleMode()
+    {
+        playlistService.ToggleShuffleMode();
+    }
+
+    [RelayCommand]
+    private void ToggleRepeatMode()
+    {
+        playlistService.ToggleRepeatMode();
     }
 
     public void Dispose()

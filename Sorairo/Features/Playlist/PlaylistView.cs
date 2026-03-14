@@ -4,6 +4,7 @@ using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Data.Converters;
 using Avalonia.Input;
+using R3;
 using Sorairo.Common.Models;
 using Sorairo.Common.UI;
 
@@ -15,6 +16,8 @@ public sealed class PlaylistView(PlaylistViewModel vm, PlaylistState playlistSta
     {
         Content = CreateDataGrid();
     }
+
+    protected override void OnActivated(ref DisposableBag disposables) { }
 
     protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
     {

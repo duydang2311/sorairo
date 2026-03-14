@@ -21,6 +21,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<AppState>();
         services.AddSingleton<PlaylistState>();
         services.AddSingleton<AudioState>();
+        services.AddSingleton<FrameProviderContext>();
         return services;
     }
 

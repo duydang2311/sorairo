@@ -1,5 +1,4 @@
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Avalonia.Threading;
 using MiniAudioEx.Core.AdvancedAPI;
@@ -13,6 +12,12 @@ namespace Sorairo.Common.Services;
 
 public sealed class MiniAudioService : IAudioService
 {
+    private static ma_sound_flags soundInitFlags =>
+        ma_sound_flags.stream
+        | ma_sound_flags.no_pitch
+        | ma_sound_flags.no_spatialization
+        | ma_sound_flags.asynchronous;
+
     private readonly AudioState audioState;
     private MaEngine? maEngine;
     private ma_sound_ptr maSoundHandle;
@@ -20,12 +25,7 @@ public sealed class MiniAudioService : IAudioService
     private bool isSoundLoaded;
     private CancellationTokenSource? cts;
 
-    private static ma_sound_flags soundInitFlags =>
-        ma_sound_flags.stream
-        | ma_sound_flags.no_pitch
-        | ma_sound_flags.no_spatialization
-        | ma_sound_flags.asynchronous;
-
+    public event Action? SoundEnded;
     public bool IsPlaying => audioState.Status == AudioPlaybackStatus.Playing;
     public bool IsPaused => audioState.Status == AudioPlaybackStatus.Paused;
 
@@ -127,7 +127,7 @@ public sealed class MiniAudioService : IAudioService
     {
         if (cts is not null)
         {
-            await cts.CancelAsync().ConfigureAwait(false);
+            cts.Cancel();
             cts.Dispose();
         }
         cts = new CancellationTokenSource();
@@ -245,10 +245,17 @@ public sealed class MiniAudioService : IAudioService
 
     private static void OnSoundEnd(IntPtr pUserData, ma_sound_ptr handle)
     {
-        var selfHandle = GCHandle.FromIntPtr(pUserData);
-        var self = (MiniAudioService)selfHandle.Target!;
-        self.audioState.ElapsedTime = self.audioState.TotalTime;
-        Task.Run(self.Stop);
+        Dispatcher.UIThread.Post(() =>
+        {
+            var selfHandle = GCHandle.FromIntPtr(pUserData);
+            var self = (MiniAudioService)selfHandle.Target!;
+            self.audioState.ElapsedTime = self.audioState.TotalTime;
+            self.Stop();
+            if (self.SoundEnded is not null)
+            {
+                self.SoundEnded();
+            }
+        });
     }
 
     private void OnAudioStatePropertyChanged(object? sender, PropertyChangedEventArgs e)

@@ -65,6 +65,7 @@
                 <MergeResourceInclude Source="avares://Sorairo/Common/UI/Styles/Slider.axaml" />
                 <MergeResourceInclude Source="avares://Sorairo/Common/UI/Styles/Menu.axaml" />
                 <MergeResourceInclude Source="avares://Sorairo/Common/UI/Styles/MenuItem.axaml" />
+                <MergeResourceInclude Source="avares://Sorairo/Common/UI/Styles/PathIcon.axaml" />
             </ResourceDictionary.MergedDictionaries>
             <ResourceDictionary.ThemeDictionaries>
                 <ResourceDictionary x:Key="Default">
@@ -99,6 +100,35 @@
                         Color="{x:Static ui:LightColors.PrimaryEmph}" />
                 </ResourceDictionary>
                 <ResourceDictionary x:Key="Dark">
+                    <SolidColorBrush x:Key="SurfaceBrush" Color="{x:Static ui:LightColors.Surface}" />
+                    <SolidColorBrush x:Key="SurfaceSubtleBrush"
+                        Color="{x:Static ui:LightColors.SurfaceSubtle}" />
+                    <SolidColorBrush x:Key="SurfaceEmphBrush"
+                        Color="{x:Static ui:LightColors.SurfaceEmph}" />
+                    <SolidColorBrush x:Key="SurfaceBorderBrush"
+                        Color="{x:Static ui:LightColors.SurfaceBorder}" />
+
+                    <SolidColorBrush x:Key="FgBrush" Color="{x:Static ui:LightColors.Fg}" />
+                    <SolidColorBrush x:Key="FgSubtleBrush"
+                        Color="{x:Static ui:LightColors.FgSubtle}" />
+                    <SolidColorBrush x:Key="FgEmphBrush" Color="{x:Static ui:LightColors.FgEmph}" />
+                    <SolidColorBrush x:Key="FgMutedBrush" Color="{x:Static ui:LightColors.FgMuted}" />
+
+                    <SolidColorBrush x:Key="BaseBrush" Color="{x:Static ui:LightColors.Base}" />
+                    <SolidColorBrush x:Key="BaseSubtleBrush"
+                        Color="{x:Static ui:LightColors.BaseSubtle}" />
+                    <SolidColorBrush x:Key="BaseEmphBrush"
+                        Color="{x:Static ui:LightColors.BaseEmph}" />
+                    <SolidColorBrush x:Key="BaseBorderBrush"
+                        Color="{x:Static ui:LightColors.BaseBorder}" />
+
+                    <SolidColorBrush x:Key="PrimaryBrush" Color="{x:Static ui:LightColors.Primary}" />
+                    <SolidColorBrush x:Key="PrimaryFgBrush"
+                        Color="#ff0000" />
+                    <SolidColorBrush x:Key="PrimarySubtleBrush"
+                        Color="{x:Static ui:LightColors.PrimarySubtle}" />
+                    <SolidColorBrush x:Key="PrimaryEmphBrush"
+                        Color="{x:Static ui:LightColors.PrimaryEmph}" />
                 </ResourceDictionary>
             </ResourceDictionary.ThemeDictionaries>
 

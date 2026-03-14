@@ -4,9 +4,11 @@ using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
+using Avalonia.Markup.Xaml.MarkupExtensions;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Styling;
+using R3;
 using Sorairo.Common.Helpers;
 using Sorairo.Common.Models;
 using Sorairo.Common.UI;
@@ -18,8 +20,12 @@ public sealed class NowPlayingView(
     PlaylistState playlistState,
     NowPlayingViewModel vm,
     AppState appState
-) : LifecycleViewBase
+) : ViewBase, IDisposable
 {
+    private PathIcon toggleRepeatButtonIcon = null!;
+    private Button toggleRepeatButton = null!;
+    private Button shuffleButton = null!;
+
     protected override void Init()
     {
         Content = new DockPanel
@@ -124,14 +130,16 @@ public sealed class NowPlayingView(
                     new Border
                     {
                         IsVisible = image is not null,
-                        CornerRadius = new CornerRadius(2),
+                        CornerRadius = new CornerRadius(8),
+                        HorizontalAlignment = HorizontalAlignment.Center,
+                        VerticalAlignment = VerticalAlignment.Center,
                         ClipToBounds = true,
                         Child = new Image { Source = image, Stretch = Stretch.Uniform },
                     }.GridRow(0),
                     new TextBlock
                     {
                         Text = "Now Playing",
-                        Margin = new Thickness(0, 16, 0, 0),
+                        Margin = new Thickness(0, 8, 0, 0),
                         FontSize = 10,
                     }
                         .GridRow(1)
@@ -193,8 +201,73 @@ public sealed class NowPlayingView(
         };
     }
 
-    private StackPanel PlaybackControls()
+    private Control PlaybackControls()
     {
+        toggleRepeatButtonIcon = new PathIcon { Width = 14, Height = 14 };
+        toggleRepeatButton = new Button
+        {
+            VerticalAlignment = VerticalAlignment.Center,
+            Padding = new Thickness(6),
+            Content = toggleRepeatButtonIcon,
+            Command = vm.ToggleRepeatModeCommand,
+        };
+        shuffleButton = new Button
+        {
+            VerticalAlignment = VerticalAlignment.Center,
+            Padding = new Thickness(6),
+            Content = new PathIcon
+            {
+                Width = 14,
+                Height = 14,
+                Data = Icons.Shuffle,
+            },
+            Command = vm.ToggleShuffleModeCommand,
+        };
+        toggleRepeatButton.Styles.Add(
+            new Style(selector =>
+                Selectors.Or(
+                    selector
+                        .OfType<Button>()
+                        .Class("repeat-mode--one")
+                        .Descendant()
+                        .OfType<PathIcon>(),
+                    selector
+                        .OfType<Button>()
+                        .Class("repeat-mode--all")
+                        .Descendant()
+                        .OfType<PathIcon>()
+                )
+            )
+            {
+                Setters =
+                {
+                    new Setter
+                    {
+                        Property = ForegroundProperty,
+                        Value = new DynamicResourceExtension("PrimaryFgBrush"),
+                    },
+                },
+            }
+        );
+        shuffleButton.Styles.Add(
+            new Style(selector =>
+                selector
+                    .OfType<Button>()
+                    .Class("shuffle-mode--shuffle")
+                    .Descendant()
+                    .OfType<PathIcon>()
+            )
+            {
+                Setters =
+                {
+                    new Setter
+                    {
+                        Property = ForegroundProperty,
+                        Value = new DynamicResourceExtension("PrimaryFgBrush"),
+                    },
+                },
+            }
+        );
         return new StackPanel
         {
             Orientation = Orientation.Horizontal,
@@ -203,14 +276,15 @@ public sealed class NowPlayingView(
             Spacing = 12,
             Children =
             {
+                shuffleButton,
                 new Button
                 {
                     VerticalAlignment = VerticalAlignment.Center,
-                    Padding = new Thickness(12),
+                    Padding = new Thickness(6),
                     Content = new PathIcon
                     {
-                        Width = 12,
-                        Height = 12,
+                        Width = 14,
+                        Height = 14,
                         Data = Icons.SkipPreviousFilled,
                     },
                     Command = vm.SkipPreviousCommand,
@@ -218,11 +292,11 @@ public sealed class NowPlayingView(
                 new Button
                 {
                     VerticalAlignment = VerticalAlignment.Center,
-                    Padding = new Thickness(12),
+                    Padding = new Thickness(6),
                     Content = new PathIcon
                     {
-                        Width = 12,
-                        Height = 12,
+                        Width = 14,
+                        Height = 14,
                         Data = Icons.StopFilled,
                     },
                     Command = vm.StopCommand,
@@ -231,7 +305,7 @@ public sealed class NowPlayingView(
                 {
                     Padding = new Thickness(12),
                     VerticalAlignment = VerticalAlignment.Center,
-                    Command = vm.PauseOrResumeCommand,
+                    Command = vm.TogglePlaybackCommand,
                 }
                     .Class("primary", "filled")
                     .Bind(
@@ -243,14 +317,14 @@ public sealed class NowPlayingView(
                                 {
                                     AudioPlaybackStatus.Playing => new PathIcon
                                     {
-                                        Width = 12,
-                                        Height = 12,
+                                        Width = 14,
+                                        Height = 14,
                                         Data = Icons.PauseFilled,
                                     },
                                     _ => new PathIcon
                                     {
-                                        Width = 12,
-                                        Height = 12,
+                                        Width = 14,
+                                        Height = 14,
                                         Data = Icons.PlayFilled,
                                     },
                                 }
@@ -259,16 +333,17 @@ public sealed class NowPlayingView(
                 new Button
                 {
                     VerticalAlignment = VerticalAlignment.Center,
-                    Padding = new Thickness(12),
+                    Padding = new Thickness(6),
                     Content = new PathIcon
                     {
-                        Width = 12,
-                        Height = 12,
+                        Width = 14,
+                        Height = 14,
                         Data = Icons.SkipNextFilled,
                     },
                     Command = vm.SkipNextCommand,
                 },
-                new Control { Width = 38, IsHitTestVisible = false }, // ghost btn for now
+                toggleRepeatButton,
+                new Control { Width = 14 + 6 + 6, IsHitTestVisible = false }, // for alignment purpose
             },
         };
     }
@@ -318,8 +393,8 @@ public sealed class NowPlayingView(
             Slider.PointerReleasedEvent,
             (_, _) =>
             {
-                vm.IsSeeking = false;
                 vm.SeekCommand.Execute(elapsedSlider.Value);
+                vm.IsSeeking = false;
             },
             RoutingStrategies.Tunnel
         );
@@ -355,8 +430,49 @@ public sealed class NowPlayingView(
         };
     }
 
-    protected override Action OnVisualTreeAttached()
+    protected override void OnActivated(ref DisposableBag disposables)
     {
-        return vm.Dispose;
+        playlistState
+            .RepeatMode.Subscribe(mode =>
+            {
+                toggleRepeatButton.Classes.Set("repeat-mode--one", mode == RepeatMode.One);
+                toggleRepeatButton.Classes.Set("repeat-mode--all", mode == RepeatMode.All);
+                switch (mode)
+                {
+                    case RepeatMode.None:
+                        ToolTip.SetTip(toggleRepeatButton, "Enable repeat");
+                        toggleRepeatButtonIcon.Data = Icons.Repeat;
+                        break;
+                    case RepeatMode.All:
+                        ToolTip.SetTip(toggleRepeatButton, "Enable repeat one");
+                        toggleRepeatButtonIcon.Data = Icons.Repeat;
+                        break;
+                    case RepeatMode.One:
+                        ToolTip.SetTip(toggleRepeatButton, "Disable repeat");
+                        toggleRepeatButtonIcon.Data = Icons.RepeatOne;
+                        break;
+                }
+            })
+            .AddTo(ref disposables);
+        playlistState
+            .Shuffle.Mode.Subscribe(mode =>
+            {
+                shuffleButton.Classes.Set("shuffle-mode--shuffle", mode == ShuffleMode.Shuffle);
+                switch (mode)
+                {
+                    case ShuffleMode.None:
+                        ToolTip.SetTip(shuffleButton, "Enable shuffle");
+                        break;
+                    case ShuffleMode.Shuffle:
+                        ToolTip.SetTip(shuffleButton, "Disable shuffle");
+                        break;
+                }
+            })
+            .AddTo(ref disposables);
+    }
+
+    public void Dispose()
+    {
+        vm.Dispose();
     }
 }

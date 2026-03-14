@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
+using R3;
 using Sorairo.Common.Helpers;
 using Sorairo.Common.Models;
 using Sorairo.Common.UI;
@@ -29,4 +30,6 @@ public sealed class PlaybackView(PlaybackViewModel vm, AudioState audioState) : 
             Command = vm.TogglePlaybackCommand,
         };
     }
+
+    protected override void OnActivated(ref DisposableBag disposables) { }
 }

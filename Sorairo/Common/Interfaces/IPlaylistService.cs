@@ -4,7 +4,7 @@ using Sorairo.Common.Models;
 
 namespace Sorairo.Common.Interfaces;
 
-public interface IPlaylistService
+public interface IPlaylistService : IDisposable
 {
     PlaylistItem AddItem(Uri path);
     void SetCurrentItem(PlaylistItem? item);
@@ -13,4 +13,6 @@ public interface IPlaylistService
     OneOf<PlaylistError, AudioError, Success> Play();
     void Stop();
     void Clear();
+    void ToggleShuffleMode();
+    void ToggleRepeatMode();
 }

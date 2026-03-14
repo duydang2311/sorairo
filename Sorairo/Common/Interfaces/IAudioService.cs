@@ -6,6 +6,8 @@ namespace Sorairo.Common.Interfaces;
 
 public interface IAudioService : IDisposable
 {
+    event Action? SoundEnded;
+
     bool IsPlaying { get; }
     bool IsPaused { get; }
 

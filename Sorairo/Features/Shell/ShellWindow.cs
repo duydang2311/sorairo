@@ -1,3 +1,4 @@
+using Ardalis.GuardClauses;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data;
@@ -5,6 +6,7 @@ using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Styling;
 using Microsoft.Extensions.DependencyInjection;
+using R3.Avalonia;
 using Sorairo.Common.Helpers;
 using Sorairo.Common.Models;
 using Sorairo.Common.UI;
@@ -19,11 +21,15 @@ public sealed class ShellWindow(
     IServiceProvider serviceProvider,
     AppState appState,
     NowPlayingView nowPlayingView,
-    ShellWindowViewModel vm
+    ShellWindowViewModel vm,
+    FrameProviderContext frameProviderContext
 ) : InitWindowBase
 {
     protected override void Init()
     {
+        var topLevel = GetTopLevel(this);
+        Guard.Against.Null(topLevel);
+        frameProviderContext.Initialize(new AvaloniaRenderingFrameProvider(topLevel));
         this.Bind(
             FluentBinding
                 .Bind(appState, a => a.WindowWidth, WidthProperty)
@@ -39,7 +45,7 @@ public sealed class ShellWindow(
                 .Bind(vm, vm => vm.OffscreenMargin, OffScreenMarginProperty)
                 .Mode(BindingMode.OneWayToSource)
         );
-        MinWidth = 320;
+        MinWidth = 400;
         Width = 960;
         Height = 720;
         ExtendClientAreaToDecorationsHint = true;
@@ -48,6 +54,14 @@ public sealed class ShellWindow(
             .ExtendClientAreaChromeHints
             .PreferSystemChrome;
         Content = CreateContent();
+    }
+
+    protected override void OnClosed(EventArgs e)
+    {
+        base.OnClosed(e);
+        nowPlayingView.Dispose();
+        vm.Dispose();
+        frameProviderContext.FrameProvider.Dispose();
     }
 
     private Border CreateContent()

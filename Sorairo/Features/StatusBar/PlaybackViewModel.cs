@@ -1,10 +1,5 @@
-using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Media;
 using CommunityToolkit.Mvvm.Input;
-using Sorairo.Common.Helpers;
 using Sorairo.Common.Interfaces;
-using Sorairo.Common.Models;
 using Sorairo.Common.UI;
 
 namespace Sorairo.Features.StatusBar;

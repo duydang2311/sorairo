@@ -22,10 +22,10 @@ public static class LightColors
     public static readonly Color FgEmph = Color.Parse("#111111");
     public static readonly Color FgMuted = Color.Parse("#717272");
 
-    public static readonly Color Base = Color.Parse("#eff2f4");
-    public static readonly Color BaseSubtle = Color.Parse("#e1e5e8");
-    public static readonly Color BaseEmph = Color.Parse("#d9dfe2");
-    public static readonly Color BaseBorder = Color.Parse("#cfd9dd");
+    public static readonly Color Base = Color.Parse("#ebeff2");
+    public static readonly Color BaseSubtle = Color.Parse("#dee2e5");
+    public static readonly Color BaseEmph = Color.Parse("#d7dbde");
+    public static readonly Color BaseBorder = Color.Parse("#d1d5d8");
 
     public static readonly Color Primary = Color.Parse("#9bd9f8");
     public static readonly Color PrimarySubtle = Color.Parse("#92cfee");
