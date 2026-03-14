@@ -144,10 +144,6 @@ public sealed class PlaylistService : IPlaylistService
             case ShuffleMode.None:
                 playlistState.Shuffle.Mode.Value = ShuffleMode.Shuffle;
                 var ids = playlistState.Items.Select(a => a.Id).ToList();
-                if (playlistState.CurrentItem is not null)
-                {
-                    ids.Remove(playlistState.CurrentItem.Id);
-                }
                 for (int i = ids.Count - 1; i > 0; --i)
                 {
                     int j = Random.Shared.Next(i + 1);
@@ -155,7 +151,8 @@ public sealed class PlaylistService : IPlaylistService
                 }
                 if (playlistState.CurrentItem is not null)
                 {
-                    ids.Insert(0, playlistState.CurrentItem.Id);
+                    var index = ids.FindIndex(a => a == playlistState.CurrentItem.Id);
+                    (ids[0], ids[index]) = (ids[index], ids[0]);
                 }
                 playlistState.Shuffle.State.Value = new ShuffleState(ids);
                 break;
