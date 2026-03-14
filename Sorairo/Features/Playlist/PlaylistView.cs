@@ -37,7 +37,10 @@ public sealed class PlaylistView(PlaylistViewModel vm, PlaylistState playlistSta
                 new DataGridTextColumn
                 {
                     Header = "Artist",
-                    Binding = new Binding(nameof(PlaylistItem.Artist), BindingMode.OneWay),
+                    Binding = new Binding(nameof(PlaylistItem.Artist))
+                    {
+                        Mode = BindingMode.OneWay,
+                    },
                     Width = new DataGridLength(1, DataGridLengthUnitType.Star),
                 },
                 new DataGridTextColumn

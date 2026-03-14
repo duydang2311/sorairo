@@ -127,15 +127,72 @@ public sealed class NowPlayingView(
                 VerticalAlignment = VerticalAlignment.Center,
                 Children =
                 {
-                    new Border
+                    new Panel
                     {
-                        IsVisible = image is not null,
-                        CornerRadius = new CornerRadius(8),
                         HorizontalAlignment = HorizontalAlignment.Center,
                         VerticalAlignment = VerticalAlignment.Center,
-                        ClipToBounds = true,
-                        Child = new Image { Source = image, Stretch = Stretch.Uniform },
-                    }.GridRow(0),
+                        Children =
+                        {
+                            new Border
+                            {
+                                IsVisible = image is not null,
+                                CornerRadius = new CornerRadius(8),
+                                ClipToBounds = true,
+                                Child = new Image { Source = image }.Bind(
+                                    FluentBinding.OneWay(
+                                        vm,
+                                        vm => vm.FrontCoverStretch,
+                                        Image.StretchProperty
+                                    )
+                                ),
+                            }.GridRow(0),
+                            new Button
+                            {
+                                VerticalAlignment = VerticalAlignment.Bottom,
+                                HorizontalAlignment = HorizontalAlignment.Right,
+                                Padding = new Thickness(4),
+                                MaxHeight = 24,
+                                Margin = new Thickness(0, 0, 0, -28),
+                                Content = new PathIcon
+                                {
+                                    Width = 16,
+                                    Height = 16,
+                                    Data = Icons.Fill,
+                                }
+                                    .Bind(
+                                        FluentBinding
+                                            .OneWay(
+                                                vm,
+                                                vm => vm.FrontCoverStretch,
+                                                PathIcon.DataProperty
+                                            )
+                                            .Convert(stretch =>
+                                                stretch switch
+                                                {
+                                                    Stretch.UniformToFill => Icons.FillFilled,
+                                                    _ => Icons.Fill,
+                                                }
+                                            )
+                                    )
+                                    .Bind(
+                                        FluentBinding
+                                            .OneWay(
+                                                vm,
+                                                vm => vm.FrontCoverStretch,
+                                                ToolTip.TipProperty
+                                            )
+                                            .Convert(stretch =>
+                                                stretch switch
+                                                {
+                                                    Stretch.UniformToFill => "Original size",
+                                                    _ => "Fit to window",
+                                                }
+                                            )
+                                    ),
+                                Command = vm.ToggleFrontCoverStretchCommand,
+                            },
+                        },
+                    },
                     new TextBlock
                     {
                         Text = "Now Playing",

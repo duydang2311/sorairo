@@ -49,10 +49,6 @@ public sealed class ShellWindow(
         Width = 960;
         Height = 720;
         ExtendClientAreaToDecorationsHint = true;
-        ExtendClientAreaChromeHints = Avalonia
-            .Platform
-            .ExtendClientAreaChromeHints
-            .PreferSystemChrome;
         Content = CreateContent();
     }
 

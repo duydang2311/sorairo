@@ -1,8 +1,8 @@
 using Avalonia.Data;
+using Avalonia.Markup.Xaml.MarkupExtensions;
+using Avalonia.Markup.Xaml.MarkupExtensions.CompiledBindings;
 using Avalonia.Styling;
-using R3;
 using Sorairo.Common.Helpers;
-using Sorairo.Common.UI;
 
 #pragma warning disable IDE0130 // Namespace does not match folder structure
 namespace Avalonia.Controls;
@@ -56,7 +56,7 @@ public static class ControlExtensions
     public static T BindResource<T>(this T control, AvaloniaProperty property, object key)
         where T : Control
     {
-        control.Bind(property, control.GetResourceObservable(key));
+        control[!property] = new DynamicResourceExtension(key);
         return control;
     }
 
@@ -73,14 +73,18 @@ public static class ControlExtensions
     )
         where TControl : Control
     {
-        control.Bind(
-            binding.GetProperty(),
-            new Binding(binding.GetPath(), binding.GetMode())
-            {
-                Source = binding.GetSource(),
-                Converter = binding.GetConverter(),
-            }
-        );
+        // need v12
+        // var compiled = CompiledBinding.Create(
+        //     binding.GetExpression(),
+        //     mode: binding.GetMode(),
+        //     source: binding.GetSource(),
+        //     converter: binding.GetConverter()
+        // );
+        control[!binding.GetProperty()] = new Binding(binding.GetPath(), binding.GetMode())
+        {
+            Source = binding.GetSource(),
+            Converter = binding.GetConverter(),
+        };
         return control;
     }
 
@@ -88,6 +92,13 @@ public static class ControlExtensions
         where T : Control
     {
         control.Classes.AddRange(classes);
+        return control;
+    }
+
+    public static T ToolTip<T>(this T control, object? value)
+        where T : Control
+    {
+        Avalonia.Controls.ToolTip.SetTip(control, value);
         return control;
     }
 }

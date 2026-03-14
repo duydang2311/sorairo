@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using Avalonia.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Sorairo.Common.Interfaces;
@@ -21,6 +22,9 @@ public sealed partial class NowPlayingViewModel(
 
     [ObservableProperty]
     private bool isSeeking;
+
+    [ObservableProperty]
+    private Stretch frontCoverStretch = Stretch.UniformToFill;
 
     [RelayCommand]
     private void TogglePlayback()
@@ -75,6 +79,16 @@ public sealed partial class NowPlayingViewModel(
     private void ToggleRepeatMode()
     {
         playlistService.ToggleRepeatMode();
+    }
+
+    [RelayCommand]
+    private void ToggleFrontCoverStretch()
+    {
+        FrontCoverStretch = FrontCoverStretch switch
+        {
+            Stretch.UniformToFill => Stretch.Uniform,
+            _ => Stretch.UniformToFill,
+        };
     }
 
     public void Dispose()

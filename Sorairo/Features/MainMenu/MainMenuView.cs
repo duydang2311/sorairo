@@ -66,13 +66,13 @@ public sealed class MainMenuView(MainMenuViewModel vm, AppState appState) : Life
                                     {
                                         Width = 12,
                                         Height = 12,
-                                        Data = Icons.RightPanel,
+                                        Data = Icons.RightPanelOpen,
                                     },
                                     AppMainView.Playlist => new PathIcon
                                     {
                                         Width = 12,
                                         Height = 12,
-                                        Data = Icons.RightPanelFilled,
+                                        Data = Icons.RightPanelCloseFilled,
                                     },
                                     _ => throw new InvalidProgramException(),
                                 }
