@@ -55,7 +55,6 @@ public sealed class ShellWindow(
     protected override void OnClosed(EventArgs e)
     {
         base.OnClosed(e);
-        nowPlayingView.Dispose();
         vm.Dispose();
         frameProviderContext.FrameProvider.Dispose();
     }

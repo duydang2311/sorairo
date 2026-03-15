@@ -30,5 +30,5 @@ public static class LightColors
     public static readonly Color Primary = Color.Parse("#9bd9f8");
     public static readonly Color PrimarySubtle = Color.Parse("#92cfee");
     public static readonly Color PrimaryEmph = Color.Parse("#88c5e4");
-    public static readonly Color PrimaryFg = Color.Parse("#17779c");
+    public static readonly Color PrimaryFg = Color.Parse("#01699b");
 }

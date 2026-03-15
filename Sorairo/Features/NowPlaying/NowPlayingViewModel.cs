@@ -1,7 +1,7 @@
-using System.ComponentModel;
 using Avalonia.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using R3;
 using Sorairo.Common.Interfaces;
 using Sorairo.Common.Models;
 using Sorairo.Common.UI;
@@ -13,15 +13,39 @@ public sealed partial class NowPlayingViewModel(
     AudioState audioState,
     IPlaylistService playlistService,
     PlaylistState playlistState
-) : ViewModelBase, IDisposable
+) : ActivatableViewModel
 {
-    protected override void Init()
+    protected override void Init() { }
+
+    protected override void OnActivated(ref DisposableBag disposables)
     {
-        playlistState.PropertyChanged += OnPlaylistStatePropertyChanged;
+        playlistState
+            .ObservePropertyChanged(a => a.CurrentItem)
+            .Subscribe(item =>
+            {
+                SkipPreviousCommand.NotifyCanExecuteChanged();
+                SkipNextCommand.NotifyCanExecuteChanged();
+            })
+            .AddTo(ref disposables);
+        audioState
+            .ObservePropertyChanged(a => a.Volume)
+            .Select(volume =>
+                volume switch
+                {
+                    <= 0 => VolumeStatus.Zero,
+                    < 0.5 => VolumeStatus.Low,
+                    _ => VolumeStatus.High,
+                }
+            )
+            .Subscribe(status => VolumeStatus = status)
+            .AddTo(ref disposables);
     }
 
     [ObservableProperty]
     private bool isSeeking;
+
+    [ObservableProperty]
+    private VolumeStatus volumeStatus;
 
     [ObservableProperty]
     private Stretch frontCoverStretch = Stretch.UniformToFill;
@@ -91,22 +115,8 @@ public sealed partial class NowPlayingViewModel(
         };
     }
 
-    public void Dispose()
-    {
-        playlistState.PropertyChanged -= OnPlaylistStatePropertyChanged;
-    }
-
     private bool CanSkip()
     {
         return playlistState.CurrentItem is not null;
-    }
-
-    private void OnPlaylistStatePropertyChanged(object? sender, PropertyChangedEventArgs e)
-    {
-        if (e.PropertyName == nameof(PlaylistState.CurrentItem))
-        {
-            SkipPreviousCommand.NotifyCanExecuteChanged();
-            SkipNextCommand.NotifyCanExecuteChanged();
-        }
     }
 }

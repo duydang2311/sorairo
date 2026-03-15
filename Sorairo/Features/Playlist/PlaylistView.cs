@@ -4,33 +4,33 @@ using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Data.Converters;
 using Avalonia.Input;
+using ObservableCollections;
 using R3;
+using Sorairo.Common.Helpers;
 using Sorairo.Common.Models;
 using Sorairo.Common.UI;
 
 namespace Sorairo.Features.Playlist;
 
-public sealed class PlaylistView(PlaylistViewModel vm, PlaylistState playlistState) : ViewBase
+public sealed class PlaylistView(PlaylistViewModel vm, PlaylistState playlistState)
+    : ActivatableView
 {
     protected override void Init()
     {
         Content = CreateDataGrid();
     }
 
-    protected override void OnActivated(ref DisposableBag disposables) { }
-
-    protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
+    protected override void OnActivated(ref DisposableBag disposables)
     {
-        base.OnAttachedToVisualTree(e);
+        vm.Activate(ref disposables);
     }
 
     private DataGrid CreateDataGrid()
     {
         var dataGrid = new DataGrid
         {
-            ItemsSource = playlistState.Items,
+            ItemsSource = vm.Items,
             IsReadOnly = true,
-            CanUserResizeColumns = true,
             CanUserSortColumns = true,
             Columns =
             {
@@ -61,7 +61,9 @@ public sealed class PlaylistView(PlaylistViewModel vm, PlaylistState playlistSta
                     Width = new DataGridLength(1, DataGridLengthUnitType.Star),
                 },
             },
-        }.BindResource(DataGrid.VerticalGridLinesBrushProperty, "SurfaceBorderBrush");
+        }
+            .Bind(FluentBinding.OneWay(vm, vm => vm.Items, DataGrid.ItemsSourceProperty))
+            .BindResource(DataGrid.VerticalGridLinesBrushProperty, "SurfaceBorderBrush");
         dataGrid.LoadingRow += (_, e) =>
         {
             var item = (PlaylistItem)e.Row.DataContext!;

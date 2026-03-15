@@ -6,12 +6,17 @@ namespace Sorairo.Common.UI;
 
 public abstract class ViewBase : UserControl
 {
-    private DisposableBag disposables;
-
     public ViewBase()
     {
         Init();
     }
+
+    protected abstract void Init();
+}
+
+public abstract class ActivatableView : ViewBase
+{
+    private DisposableBag disposables;
 
     protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
     {
@@ -23,8 +28,8 @@ public abstract class ViewBase : UserControl
     {
         base.OnDetachedFromVisualTree(e);
         disposables.Dispose();
+        disposables = default;
     }
 
-    protected abstract void Init();
     protected abstract void OnActivated(ref DisposableBag disposables);
 }

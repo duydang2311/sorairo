@@ -1,5 +1,4 @@
 using Avalonia.Controls;
-using Avalonia.Media;
 using Avalonia.Platform.Storage;
 using CommunityToolkit.Mvvm.Messaging;
 using R3;
@@ -14,7 +13,6 @@ public sealed class MainMenuView(MainMenuViewModel vm, AppState appState) : Life
 {
     protected override void Init()
     {
-        DataContext = vm;
         Content = new Grid
         {
             ColumnDefinitions = new ColumnDefinitions("Auto,*,Auto"),
@@ -81,8 +79,6 @@ public sealed class MainMenuView(MainMenuViewModel vm, AppState appState) : Life
             },
         };
     }
-
-    protected override void OnActivated(ref DisposableBag disposables) { }
 
     protected override Action OnVisualTreeAttached()
     {

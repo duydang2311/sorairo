@@ -16,13 +16,12 @@ using Sorairo.Common.UI;
 namespace Sorairo.Features.NowPlaying;
 
 public sealed class NowPlayingView(
+    NowPlayingViewModel vm,
     AudioState audioState,
     PlaylistState playlistState,
-    NowPlayingViewModel vm,
     AppState appState
-) : ViewBase, IDisposable
+) : ActivatableView
 {
-    private PathIcon toggleRepeatButtonIcon = null!;
     private Button toggleRepeatButton = null!;
     private Button shuffleButton = null!;
 
@@ -68,7 +67,7 @@ public sealed class NowPlayingView(
                                                 .OneWay(
                                                     appState,
                                                     a => a.Viewport,
-                                                    Grid.HorizontalAlignmentProperty
+                                                    HorizontalAlignmentProperty
                                                 )
                                                 .Convert(viewport =>
                                                     viewport switch
@@ -82,7 +81,6 @@ public sealed class NowPlayingView(
                                     new Border
                                     {
                                         Child = VolumeSlider(),
-                                        Width = 96,
                                         HorizontalAlignment = HorizontalAlignment.Right,
                                     }.GridColumn(1),
                                 },
@@ -97,26 +95,29 @@ public sealed class NowPlayingView(
                     FluentBinding
                         .Bind(playlistState, a => a.CurrentItem, ContentProperty)
                         .Mode(BindingMode.OneWay)
-                        .Convert(a =>
-                            a switch
+                        .Convert(item =>
+                        {
+                            if (frontCoverImage is not null)
                             {
-                                PlaylistItem item => PlayingView(item),
-                                _ => null,
+                                frontCoverImage.Dispose();
+                                frontCoverImage = null;
                             }
-                        )
+                            return item is null ? null : PlayingView(item);
+                        })
                 ),
             },
         };
     }
 
+    Bitmap? frontCoverImage;
+
     private Border PlayingView(PlaylistItem item)
     {
-        IImage? image = default;
         var frontCover = item.GetFrontCover();
         if (frontCover is not null)
         {
             using var ms = new MemoryStream(frontCover);
-            image = new Bitmap(ms);
+            frontCoverImage = new Bitmap(ms);
         }
         return new Border
         {
@@ -131,14 +132,27 @@ public sealed class NowPlayingView(
                     {
                         HorizontalAlignment = HorizontalAlignment.Center,
                         VerticalAlignment = VerticalAlignment.Center,
+                        Transitions =
+                        [
+                            new DoubleTransition
+                            {
+                                Property = WidthProperty,
+                                Duration = TimeSpan.FromMilliseconds(200),
+                            },
+                            new DoubleTransition
+                            {
+                                Property = HeightProperty,
+                                Duration = TimeSpan.FromMilliseconds(200),
+                            },
+                        ],
                         Children =
                         {
                             new Border
                             {
-                                IsVisible = image is not null,
+                                IsVisible = frontCoverImage is not null,
                                 CornerRadius = new CornerRadius(8),
                                 ClipToBounds = true,
-                                Child = new Image { Source = image }.Bind(
+                                Child = new Image { Source = frontCoverImage }.Bind(
                                     FluentBinding.OneWay(
                                         vm,
                                         vm => vm.FrontCoverStretch,
@@ -225,19 +239,13 @@ public sealed class NowPlayingView(
         };
     }
 
-    private Grid VolumeSlider()
+    private StackPanel VolumeSlider()
     {
-        return new Grid
+        return new StackPanel
         {
-            ColumnDefinitions = new ColumnDefinitions("Auto,*"),
-            ColumnSpacing = 8,
-            Styles =
-            {
-                new Style(a => a.OfType<Grid>().Child())
-                {
-                    Setters = { new Setter(VerticalAlignmentProperty, VerticalAlignment.Center) },
-                },
-            },
+            Orientation = Orientation.Horizontal,
+            VerticalAlignment = VerticalAlignment.Center,
+            Spacing = 8,
             Children =
             {
                 new PathIcon
@@ -245,8 +253,28 @@ public sealed class NowPlayingView(
                     Width = Icons.MD,
                     Height = Icons.MD,
                     Data = Icons.VolumeHigh,
-                }.GridColumn(0),
-                new Slider { Minimum = 0, Maximum = 1 }
+                }
+                    .GridColumn(0)
+                    .Bind(
+                        FluentBinding
+                            .OneWay(vm, vm => vm.VolumeStatus, PathIcon.DataProperty)
+                            .Convert(status =>
+                                status switch
+                                {
+                                    VolumeStatus.Zero => Icons.VolumeZero,
+                                    VolumeStatus.Low => Icons.VolumeLow,
+                                    VolumeStatus.High => Icons.VolumeHigh,
+                                    VolumeStatus.Muted => Icons.VolumeMuted,
+                                    _ => Icons.VolumeZero,
+                                }
+                            )
+                    ),
+                new Slider
+                {
+                    Minimum = 0,
+                    Maximum = 1,
+                    Width = 96,
+                }
                     .GridColumn(1)
                     .Bind(
                         FluentBinding
@@ -260,24 +288,23 @@ public sealed class NowPlayingView(
 
     private Control PlaybackControls()
     {
-        toggleRepeatButtonIcon = new PathIcon { Width = Icons.MD, Height = Icons.MD }.Bind(
-            FluentBinding
-                .OneWay(playlistState, state => state.RepeatMode, PathIcon.DataProperty)
-                .Convert(mode =>
-                    mode switch
-                    {
-                        RepeatMode.None => Icons.RepeatOff,
-                        RepeatMode.All => Icons.RepeatAll,
-                        RepeatMode.One => Icons.RepeatOne,
-                        _ => Icons.RepeatOff,
-                    }
-                )
-        );
         toggleRepeatButton = new Button
         {
             VerticalAlignment = VerticalAlignment.Center,
             Padding = new Thickness(6),
-            Content = toggleRepeatButtonIcon,
+            Content = new PathIcon { Width = Icons.MD, Height = Icons.MD }.Bind(
+                FluentBinding
+                    .OneWay(playlistState, state => state.RepeatMode, PathIcon.DataProperty)
+                    .Convert(mode =>
+                        mode switch
+                        {
+                            RepeatMode.None => Icons.RepeatOff,
+                            RepeatMode.All => Icons.RepeatAll,
+                            RepeatMode.One => Icons.RepeatOne,
+                            _ => Icons.RepeatOff,
+                        }
+                    )
+            ),
             Command = vm.ToggleRepeatModeCommand,
         }.Bind(
             FluentBinding
@@ -528,6 +555,17 @@ public sealed class NowPlayingView(
 
     protected override void OnActivated(ref DisposableBag disposables)
     {
+        vm.Activate(ref disposables);
+        disposables.Add(
+            Disposable.Create(() =>
+            {
+                if (frontCoverImage is not null)
+                {
+                    frontCoverImage.Dispose();
+                    frontCoverImage = null;
+                }
+            })
+        );
         playlistState
             .ObservePropertyChanged(state => state.RepeatMode)
             .Subscribe(mode =>
@@ -543,10 +581,5 @@ public sealed class NowPlayingView(
                 shuffleButton.Classes.Set("shuffle-mode--shuffle", mode == ShuffleMode.Shuffle);
             })
             .AddTo(ref disposables);
-    }
-
-    public void Dispose()
-    {
-        vm.Dispose();
     }
 }

@@ -2,7 +2,6 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data;
 using Microsoft.Extensions.DependencyInjection;
-using R3;
 using Sorairo.Common.Helpers;
 using Sorairo.Common.Models;
 using Sorairo.Common.UI;
@@ -40,6 +39,4 @@ public sealed class StatusBarView(AudioState audioState, IServiceProvider servic
             },
         };
     }
-
-    protected override void OnActivated(ref DisposableBag disposables) { }
 }
