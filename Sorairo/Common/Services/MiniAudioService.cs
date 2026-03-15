@@ -35,7 +35,7 @@ public sealed class MiniAudioService : IAudioService
         audioState.PropertyChanged += OnAudioStatePropertyChanged;
     }
 
-    public OneOf<AudioError, Success> Play(Uri path)
+    public OneOf<AudioError, Success> Play2(Uri path)
     {
         if (maEngine is null)
         {
@@ -113,7 +113,45 @@ public sealed class MiniAudioService : IAudioService
         audioState.Status = AudioPlaybackStatus.Playing;
         audioState.TotalTime = GetTotalTime();
         audioState.ElapsedTime = GetElapsedTime();
+
         _ = StartTrackingElapsedSecondsAsync();
+        return new Success();
+    }
+
+    private ma_device_ptr deviceHandle;
+    private ma_decoder_ptr decoderHandle;
+
+    public OneOf<AudioError, Success> Play(Uri path)
+    {
+        var decoderConfig = MiniAudioNative.ma_decoder_config_init(ma_format.f32, 0, 0);
+        decoderHandle = new ma_decoder_ptr(allocate: true);
+        if (
+            ma_decoder_init_file_w(path.LocalPath, ref decoderConfig, decoderHandle)
+            != ma_result.success
+        )
+        {
+            decoderHandle.Free();
+            return new AudioError(AudioErrorKind.EngineInitFailed, "1");
+        }
+        ma_device_config config = MiniAudioNative.ma_device_config_init(ma_device_type.playback);
+        config.playback.format = ma_format.f32;
+        config.playback.channels = 0;
+        config.sampleRate = 0;
+        config.SetDataCallback(OnDeviceData);
+        var gcHandle = GCHandle.Alloc((audioState, decoderHandle.pointer));
+        config.pUserData = GCHandle.ToIntPtr(gcHandle);
+
+        deviceHandle = new ma_device_ptr(allocate: true);
+        if (MiniAudioNative.ma_device_init(default, ref config, deviceHandle) != ma_result.success)
+        {
+            decoderHandle.Free();
+            deviceHandle.Free();
+            return new AudioError(AudioErrorKind.EngineInitFailed, "1");
+        }
+
+        isSoundLoaded = true;
+        MiniAudioNative.ma_device_start(deviceHandle);
+        // _ = StartTrackingElapsedSecondsAsync();
         return new Success();
     }
 
@@ -272,4 +310,61 @@ public sealed class MiniAudioService : IAudioService
 
     [DllImport("miniaudioex", CallingConvention = CallingConvention.Cdecl)]
     public static extern ma_result ma_fence_wait(ma_fence_ptr ptr);
+
+    private static unsafe void OnDeviceData(
+        ma_device_ptr pDevice,
+        IntPtr pOutput,
+        IntPtr pInput,
+        uint frameCount
+    )
+    {
+        var device = pDevice.Get();
+        if (device == null)
+        {
+            return;
+        }
+
+        var selfHandle = GCHandle.FromIntPtr(device->pUserData);
+        var data = ((AudioState state, IntPtr decoderPtr))selfHandle.Target!;
+        var decoder = new ma_decoder_ptr(data.decoderPtr);
+
+        if (
+            MiniAudioNative.ma_decoder_read_pcm_frames(decoder, pOutput, frameCount, IntPtr.Zero)
+            == ma_result.success
+        )
+        {
+            unsafe
+            {
+                int sampleCount = (int)(frameCount * decoder.Get()->outputChannels);
+                var output = (float*)pOutput;
+
+                if (data.state.Volume < 1)
+                {
+                    for (var i = 0; i < sampleCount; i++)
+                    {
+                        output[i] *= (float)data.state.Volume;
+                    }
+                }
+                // var output = new NativeArray<float>(pOutput, sampleCount);
+
+                var buffer = VisualizerService.buffer;
+                fixed (float* dst = buffer)
+                {
+                    Buffer.MemoryCopy(
+                        output,
+                        dst,
+                        buffer.Length * sizeof(float),
+                        sampleCount * sizeof(float)
+                    );
+                }
+            }
+        }
+    }
+
+    [DllImport("miniaudioex", CallingConvention = CallingConvention.Cdecl)]
+    public static extern ma_result ma_decoder_init_file_w(
+        [MarshalAs(UnmanagedType.LPWStr)] string pFilePath,
+        ref ma_decoder_config pConfig,
+        ma_decoder_ptr pDecoder
+    );
 }

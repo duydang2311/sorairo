@@ -23,7 +23,9 @@
     </PackageReference>
     <PackageReference Include="Avalonia.Themes.Simple" Version="11.3.12" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+    <PackageReference Include="FftFlat" Version="1.0.1" />
     <PackageReference Include="JAJ.Packages.MiniAudioEx" Version="3.1.1" />
+    <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.3" />
     <PackageReference Include="ObservableCollections" Version="3.3.4" />
     <PackageReference Include="OneOf" Version="3.0.271" />

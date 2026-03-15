@@ -8,9 +8,11 @@ using Avalonia.Markup.Xaml.MarkupExtensions;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Styling;
+using Avalonia.Threading;
 using R3;
 using Sorairo.Common.Helpers;
 using Sorairo.Common.Models;
+using Sorairo.Common.Services;
 using Sorairo.Common.UI;
 
 namespace Sorairo.Features.NowPlaying;
@@ -119,12 +121,20 @@ public sealed class NowPlayingView(
             using var ms = new MemoryStream(frontCover);
             frontCoverImage = new Bitmap(ms);
         }
+        var timer = new PeriodicTimer(TimeSpan.FromMilliseconds(16));
+        _ = Task.Run(async () =>
+        {
+            while (await timer.WaitForNextTickAsync())
+            {
+                VisualizerService.ProcessBuffer(960);
+            }
+        });
         return new Border
         {
             Padding = new Thickness(16),
             Child = new Grid
             {
-                RowDefinitions = new RowDefinitions("*,Auto,Auto,Auto"),
+                RowDefinitions = new RowDefinitions("*,Auto,Auto"),
                 VerticalAlignment = VerticalAlignment.Center,
                 Children =
                 {
@@ -202,25 +212,45 @@ public sealed class NowPlayingView(
                     }
                         .GridRow(1)
                         .BindResource(ForegroundProperty, "FgMutedBrush"),
-                    new TextBlock
+                    new Grid
                     {
-                        Text = item.Title,
-                        Margin = new Thickness(0, 4, 0, 0),
-                        IsVisible = !string.IsNullOrEmpty(item.Title),
-                        FontSize = 18,
-                        FontWeight = FontWeight.Medium,
-                        TextWrapping = TextWrapping.WrapWithOverflow,
-                    }
-                        .GridRow(2)
-                        .BindResource(ForegroundProperty, "FgEmphBrush"),
-                    new TextBlock
-                    {
-                        Text = item.Artist,
-                        Margin = new Thickness(0, 4, 0, 0),
-                        FontWeight = FontWeight.SemiBold,
-                    }
-                        .GridRow(3)
-                        .BindResource(ForegroundProperty, "PrimaryFgBrush"),
+                        ColumnDefinitions = new ColumnDefinitions("*,Auto"),
+                        Children =
+                        {
+                            new Grid
+                            {
+                                RowDefinitions = new RowDefinitions("Auto,Auto"),
+                                HorizontalAlignment = HorizontalAlignment.Left,
+                                Children =
+                                {
+                                    new TextBlock
+                                    {
+                                        Text = item.Title,
+                                        Margin = new Thickness(0, 4, 0, 0),
+                                        IsVisible = !string.IsNullOrEmpty(item.Title),
+                                        FontSize = 18,
+                                        FontWeight = FontWeight.Medium,
+                                        TextWrapping = TextWrapping.WrapWithOverflow,
+                                    }
+                                        .BindResource(ForegroundProperty, "FgEmphBrush")
+                                        .GridRow(0),
+                                    new TextBlock
+                                    {
+                                        Text = item.Artist,
+                                        Margin = new Thickness(0, 4, 0, 0),
+                                        FontWeight = FontWeight.SemiBold,
+                                    }
+                                        .BindResource(ForegroundProperty, "PrimaryFgBrush")
+                                        .GridRow(1),
+                                },
+                            }.GridColumn(0),
+                            new VisualizerView
+                            {
+                                VerticalAlignment = VerticalAlignment.Stretch,
+                                Width = 128,
+                            }.GridColumn(1),
+                        },
+                    }.GridRow(2),
                 },
             },
         };
