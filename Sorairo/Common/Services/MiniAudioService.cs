@@ -132,7 +132,7 @@ public sealed class MiniAudioService : IAudioService
         }
         cts = new CancellationTokenSource();
         var ct = cts.Token;
-        using var timer = new PeriodicTimer(TimeSpan.FromMilliseconds(200));
+        using var timer = new PeriodicTimer(TimeSpan.FromMilliseconds(250));
         try
         {
             while (await timer.WaitForNextTickAsync(ct))

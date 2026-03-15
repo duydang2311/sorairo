@@ -132,19 +132,6 @@ public sealed class NowPlayingView(
                     {
                         HorizontalAlignment = HorizontalAlignment.Center,
                         VerticalAlignment = VerticalAlignment.Center,
-                        Transitions =
-                        [
-                            new DoubleTransition
-                            {
-                                Property = WidthProperty,
-                                Duration = TimeSpan.FromMilliseconds(200),
-                            },
-                            new DoubleTransition
-                            {
-                                Property = HeightProperty,
-                                Duration = TimeSpan.FromMilliseconds(200),
-                            },
-                        ],
                         Children =
                         {
                             new Border
@@ -499,7 +486,7 @@ public sealed class NowPlayingView(
                                 new DoubleTransition
                                 {
                                     Property = Slider.ValueProperty,
-                                    Duration = TimeSpan.FromMilliseconds(200),
+                                    Duration = TimeSpan.FromMilliseconds(250),
                                 },
                             };
                     })
