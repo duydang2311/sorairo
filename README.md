@@ -12,11 +12,12 @@ I've pulled the first usable cross-platform version recently. And there are lots
 - [x] Cross-platform playback with miniaudio
 - [x] File metadata read (ATL.NET)
 - [ ] File metadata write utilities (ATL.NET)
-- [ ] Playback modes: shuffle, repeat.
+- [x] Playback modes: shuffle, repeat.
 - [ ] Adding sources from YouTube (yt-dlp on-demand)
 - [ ] Basic audio visualization
 - [ ] Discord RPC option
 - [ ] Drag and drop songs
+- [ ] Audio normalization (embedded rsgain)
 - [ ] Release packaging (Velopack)
 
 ## Performance
