@@ -64,15 +64,15 @@ public sealed class MainMenuView(MainMenuViewModel vm, AppState appState) : Life
                                 {
                                     AppMainView.None => new PathIcon
                                     {
-                                        Width = 12,
-                                        Height = 12,
-                                        Data = Icons.RightPanelOpen,
+                                        Width = Icons.SM,
+                                        Height = Icons.SM,
+                                        Data = Icons.RightPanel16,
                                     },
                                     AppMainView.Playlist => new PathIcon
                                     {
-                                        Width = 12,
-                                        Height = 12,
-                                        Data = Icons.RightPanelCloseFilled,
+                                        Width = Icons.SM,
+                                        Height = Icons.SM,
+                                        Data = Icons.RightPanel16Filled,
                                     },
                                     _ => throw new InvalidProgramException(),
                                 }

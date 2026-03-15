@@ -1,6 +1,5 @@
 using Avalonia.Data;
 using Avalonia.Markup.Xaml.MarkupExtensions;
-using Avalonia.Markup.Xaml.MarkupExtensions.CompiledBindings;
 using Avalonia.Styling;
 using Sorairo.Common.Helpers;
 

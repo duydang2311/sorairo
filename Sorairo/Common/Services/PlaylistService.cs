@@ -52,9 +52,9 @@ public sealed class PlaylistService : IPlaylistService
             {
                 return new PlaylistError(PlaylistErrorKind.EmptyPlaylist, "Playlist is empty");
             }
-            if (playlistState.Shuffle.Mode.Value == ShuffleMode.Shuffle)
+            if (playlistState.Shuffle.Mode == ShuffleMode.Shuffle)
             {
-                var state = playlistState.Shuffle.State.Value;
+                var state = playlistState.Shuffle.State;
                 Guard.Against.Null(state);
                 var id = state.Ids[0];
                 var item = playlistState.Items.Find(a => a.Id == id);
@@ -88,14 +88,14 @@ public sealed class PlaylistService : IPlaylistService
 
     private void OnSoundEnded()
     {
-        if (playlistState.Shuffle.Mode.Value == ShuffleMode.Shuffle)
+        if (playlistState.Shuffle.Mode == ShuffleMode.Shuffle)
         {
-            switch (playlistState.RepeatMode.CurrentValue)
+            switch (playlistState.RepeatMode)
             {
                 case RepeatMode.None:
-                    var state = playlistState.Shuffle.State.Value;
+                    var state = playlistState.Shuffle.State;
                     Guard.Against.Null(state);
-                    var currentId = state.CurrentId.Value;
+                    var currentId = state.CurrentId;
                     Guard.Against.Null(currentId);
                     var index = state.Ids.FindIndex(id => id == currentId);
                     if (index == state.Ids.Count - 1)
@@ -115,7 +115,7 @@ public sealed class PlaylistService : IPlaylistService
             }
             return;
         }
-        switch (playlistState.RepeatMode.CurrentValue)
+        switch (playlistState.RepeatMode)
         {
             case RepeatMode.None:
                 Guard.Against.Null(playlistState.CurrentItem);
@@ -139,10 +139,10 @@ public sealed class PlaylistService : IPlaylistService
 
     public void ToggleShuffleMode()
     {
-        switch (playlistState.Shuffle.Mode.Value)
+        switch (playlistState.Shuffle.Mode)
         {
             case ShuffleMode.None:
-                playlistState.Shuffle.Mode.Value = ShuffleMode.Shuffle;
+                playlistState.Shuffle.Mode = ShuffleMode.Shuffle;
                 var ids = playlistState.Items.Select(a => a.Id).ToList();
                 for (int i = ids.Count - 1; i > 0; --i)
                 {
@@ -154,18 +154,18 @@ public sealed class PlaylistService : IPlaylistService
                     var index = ids.FindIndex(a => a == playlistState.CurrentItem.Id);
                     (ids[0], ids[index]) = (ids[index], ids[0]);
                 }
-                playlistState.Shuffle.State.Value = new ShuffleState(ids);
+                playlistState.Shuffle.State = new ShuffleState(ids);
                 break;
             case ShuffleMode.Shuffle:
-                playlistState.Shuffle.Mode.Value = ShuffleMode.None;
-                playlistState.Shuffle.State.Value = null;
+                playlistState.Shuffle.Mode = ShuffleMode.None;
+                playlistState.Shuffle.State = null;
                 break;
         }
     }
 
     public void ToggleRepeatMode()
     {
-        playlistState.RepeatMode.Value = playlistState.RepeatMode.Value switch
+        playlistState.RepeatMode = playlistState.RepeatMode switch
         {
             RepeatMode.None => RepeatMode.All,
             RepeatMode.All => RepeatMode.One,
@@ -176,10 +176,10 @@ public sealed class PlaylistService : IPlaylistService
 
     private void Move(int delta)
     {
-        if (playlistState.Shuffle.Mode.Value == ShuffleMode.Shuffle)
+        if (playlistState.Shuffle.Mode == ShuffleMode.Shuffle)
         {
-            var state = Guard.Against.Null(playlistState.Shuffle.State.Value);
-            var currentId = Guard.Against.Null(state.CurrentId.Value);
+            var state = Guard.Against.Null(playlistState.Shuffle.State);
+            var currentId = Guard.Against.Null(state.CurrentId);
 
             var index = state.Ids.FindIndex(id => id == currentId);
             var count = state.Ids.Count;
@@ -187,7 +187,7 @@ public sealed class PlaylistService : IPlaylistService
             var nextId = state.Ids[(index + delta + count) % count];
             var item = Guard.Against.Null(playlistState.Items.Find(a => a.Id == nextId));
 
-            state.CurrentId.Value = nextId;
+            state.CurrentId = nextId;
             playlistState.CurrentItem = item;
         }
         else

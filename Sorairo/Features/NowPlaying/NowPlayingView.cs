@@ -151,13 +151,13 @@ public sealed class NowPlayingView(
                                 VerticalAlignment = VerticalAlignment.Bottom,
                                 HorizontalAlignment = HorizontalAlignment.Right,
                                 Padding = new Thickness(4),
-                                MaxHeight = 24,
-                                Margin = new Thickness(0, 0, 0, -28),
+                                MaxHeight = Icons.MD + 8,
+                                Margin = new Thickness(0, 0, 0, -Icons.MD - 8 - 4),
                                 Content = new PathIcon
                                 {
-                                    Width = 16,
-                                    Height = 16,
-                                    Data = Icons.Fill,
+                                    Width = Icons.MD,
+                                    Height = Icons.MD,
+                                    Data = Icons.Fill16,
                                 }
                                     .Bind(
                                         FluentBinding
@@ -169,8 +169,8 @@ public sealed class NowPlayingView(
                                             .Convert(stretch =>
                                                 stretch switch
                                                 {
-                                                    Stretch.UniformToFill => Icons.FillFilled,
-                                                    _ => Icons.Fill,
+                                                    Stretch.UniformToFill => Icons.Fill16Filled,
+                                                    _ => Icons.Fill16,
                                                 }
                                             )
                                     )
@@ -242,9 +242,9 @@ public sealed class NowPlayingView(
             {
                 new PathIcon
                 {
-                    Width = 12,
-                    Height = 12,
-                    Data = Icons.VolumeLowFilled,
+                    Width = Icons.MD,
+                    Height = Icons.MD,
+                    Data = Icons.VolumeHigh,
                 }.GridColumn(0),
                 new Slider { Minimum = 0, Maximum = 1 }
                     .GridColumn(1)
@@ -260,26 +260,65 @@ public sealed class NowPlayingView(
 
     private Control PlaybackControls()
     {
-        toggleRepeatButtonIcon = new PathIcon { Width = 14, Height = 14 };
+        toggleRepeatButtonIcon = new PathIcon { Width = Icons.MD, Height = Icons.MD }.Bind(
+            FluentBinding
+                .OneWay(playlistState, state => state.RepeatMode, PathIcon.DataProperty)
+                .Convert(mode =>
+                    mode switch
+                    {
+                        RepeatMode.None => Icons.RepeatOff,
+                        RepeatMode.All => Icons.RepeatAll,
+                        RepeatMode.One => Icons.RepeatOne,
+                        _ => Icons.RepeatOff,
+                    }
+                )
+        );
         toggleRepeatButton = new Button
         {
             VerticalAlignment = VerticalAlignment.Center,
             Padding = new Thickness(6),
             Content = toggleRepeatButtonIcon,
             Command = vm.ToggleRepeatModeCommand,
-        };
+        }.Bind(
+            FluentBinding
+                .OneWay(playlistState, state => state.RepeatMode, ToolTip.TipProperty)
+                .Convert(mode =>
+                    mode switch
+                    {
+                        RepeatMode.All => "Enable repeat one",
+                        RepeatMode.One => "Disable repeat",
+                        _ => "Enable repeat",
+                    }
+                )
+        );
         shuffleButton = new Button
         {
             VerticalAlignment = VerticalAlignment.Center,
             Padding = new Thickness(6),
-            Content = new PathIcon
-            {
-                Width = 14,
-                Height = 14,
-                Data = Icons.Shuffle,
-            },
+            Content = new PathIcon { Width = Icons.MD, Height = Icons.MD }.Bind(
+                FluentBinding
+                    .OneWay(playlistState.Shuffle, shuffle => shuffle.Mode, PathIcon.DataProperty)
+                    .Convert(mode =>
+                        mode switch
+                        {
+                            ShuffleMode.None => Icons.ShuffleOff,
+                            ShuffleMode.Shuffle => Icons.Shuffle,
+                            _ => Icons.ShuffleOff,
+                        }
+                    )
+            ),
             Command = vm.ToggleShuffleModeCommand,
-        };
+        }.Bind(
+            FluentBinding
+                .OneWay(playlistState.Shuffle, shuffle => shuffle.Mode, ToolTip.TipProperty)
+                .Convert(mode =>
+                    mode switch
+                    {
+                        ShuffleMode.Shuffle => "Disable shuffle",
+                        _ => "Enable shuffle",
+                    }
+                )
+        );
         toggleRepeatButton.Styles.Add(
             new Style(selector =>
                 Selectors.Or(
@@ -340,8 +379,8 @@ public sealed class NowPlayingView(
                     Padding = new Thickness(6),
                     Content = new PathIcon
                     {
-                        Width = 14,
-                        Height = 14,
+                        Width = Icons.MD,
+                        Height = Icons.MD,
                         Data = Icons.SkipPreviousFilled,
                     },
                     Command = vm.SkipPreviousCommand,
@@ -352,8 +391,8 @@ public sealed class NowPlayingView(
                     Padding = new Thickness(6),
                     Content = new PathIcon
                     {
-                        Width = 14,
-                        Height = 14,
+                        Width = Icons.MD,
+                        Height = Icons.MD,
                         Data = Icons.StopFilled,
                     },
                     Command = vm.StopCommand,
@@ -374,14 +413,14 @@ public sealed class NowPlayingView(
                                 {
                                     AudioPlaybackStatus.Playing => new PathIcon
                                     {
-                                        Width = 14,
-                                        Height = 14,
+                                        Width = Icons.MD,
+                                        Height = Icons.MD,
                                         Data = Icons.PauseFilled,
                                     },
                                     _ => new PathIcon
                                     {
-                                        Width = 14,
-                                        Height = 14,
+                                        Width = Icons.MD,
+                                        Height = Icons.MD,
                                         Data = Icons.PlayFilled,
                                     },
                                 }
@@ -393,14 +432,14 @@ public sealed class NowPlayingView(
                     Padding = new Thickness(6),
                     Content = new PathIcon
                     {
-                        Width = 14,
-                        Height = 14,
+                        Width = Icons.MD,
+                        Height = Icons.MD,
                         Data = Icons.SkipNextFilled,
                     },
                     Command = vm.SkipNextCommand,
                 },
                 toggleRepeatButton,
-                new Control { Width = 14 + 6 + 6, IsHitTestVisible = false }, // for alignment purpose
+                new Control { Width = Icons.MD + 6 + 6, IsHitTestVisible = false }, // for alignment purpose
             },
         };
     }
@@ -490,40 +529,18 @@ public sealed class NowPlayingView(
     protected override void OnActivated(ref DisposableBag disposables)
     {
         playlistState
-            .RepeatMode.Subscribe(mode =>
+            .ObservePropertyChanged(state => state.RepeatMode)
+            .Subscribe(mode =>
             {
                 toggleRepeatButton.Classes.Set("repeat-mode--one", mode == RepeatMode.One);
                 toggleRepeatButton.Classes.Set("repeat-mode--all", mode == RepeatMode.All);
-                switch (mode)
-                {
-                    case RepeatMode.None:
-                        ToolTip.SetTip(toggleRepeatButton, "Enable repeat");
-                        toggleRepeatButtonIcon.Data = Icons.Repeat;
-                        break;
-                    case RepeatMode.All:
-                        ToolTip.SetTip(toggleRepeatButton, "Enable repeat one");
-                        toggleRepeatButtonIcon.Data = Icons.Repeat;
-                        break;
-                    case RepeatMode.One:
-                        ToolTip.SetTip(toggleRepeatButton, "Disable repeat");
-                        toggleRepeatButtonIcon.Data = Icons.RepeatOne;
-                        break;
-                }
             })
             .AddTo(ref disposables);
         playlistState
-            .Shuffle.Mode.Subscribe(mode =>
+            .Shuffle.ObservePropertyChanged(state => state.Mode)
+            .Subscribe(mode =>
             {
                 shuffleButton.Classes.Set("shuffle-mode--shuffle", mode == ShuffleMode.Shuffle);
-                switch (mode)
-                {
-                    case ShuffleMode.None:
-                        ToolTip.SetTip(shuffleButton, "Enable shuffle");
-                        break;
-                    case ShuffleMode.Shuffle:
-                        ToolTip.SetTip(shuffleButton, "Disable shuffle");
-                        break;
-                }
             })
             .AddTo(ref disposables);
     }

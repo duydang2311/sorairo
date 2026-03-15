@@ -1,35 +1,40 @@
-using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using ObservableCollections;
-using R3;
 
 namespace Sorairo.Common.Models;
 
 public sealed partial class PlaylistState : ObservableObject
 {
-    public ObservableCollection<PlaylistItem> Items { get; } = [];
+    public ObservableList<PlaylistItem> Items { get; } = [];
 
     [ObservableProperty]
     private PlaylistItem? currentItem;
 
-    public ReactiveProperty<RepeatMode> RepeatMode { get; } = new(Models.RepeatMode.None);
+    [ObservableProperty]
+    private RepeatMode repeatMode = RepeatMode.All;
+
     public PlaylistShuffle Shuffle { get; } = new();
 }
 
-public sealed record PlaylistShuffle
+public sealed partial class PlaylistShuffle : ObservableObject
 {
-    public ReactiveProperty<ShuffleMode> Mode { get; } = new(ShuffleMode.None);
-    public ReactiveProperty<ShuffleState?> State { get; set; } = new();
+    [ObservableProperty]
+    private ShuffleMode mode = ShuffleMode.None;
+
+    [ObservableProperty]
+    private ShuffleState? state;
 }
 
-public sealed record ShuffleState
+public sealed partial class ShuffleState : ObservableObject
 {
     public ObservableList<Guid> Ids { get; }
-    public ReactiveProperty<Guid?> CurrentId { get; }
+
+    [ObservableProperty]
+    private Guid? currentId;
 
     public ShuffleState(IEnumerable<Guid> ids)
     {
         Ids = [.. ids];
-        CurrentId = new(Ids.ElementAtOrDefault(0));
+        CurrentId = Ids.ElementAtOrDefault(0);
     }
 }
