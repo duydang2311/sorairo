@@ -172,18 +172,20 @@ public sealed class MiniAudioService : IAudioService
         using var timer = new PeriodicTimer(TimeSpan.FromMilliseconds(250));
         try
         {
+            object state = ((IAudioService)this, audioState);
             while (await timer.WaitForNextTickAsync(ct))
             {
+                if (audioState.Status != AudioPlaybackStatus.Playing)
+                {
+                    continue;
+                }
                 Dispatcher.UIThread.Post(
                     static (state) =>
                     {
                         var (audioService, audioState) = ((IAudioService, AudioState))state!;
-                        if (audioState.Status == AudioPlaybackStatus.Playing)
-                        {
-                            audioState.ElapsedTime = audioService.GetElapsedTime();
-                        }
+                        audioState.ElapsedTime = audioService.GetElapsedTime();
                     },
-                    (this as IAudioService, audioState)
+                    state
                 );
             }
         }
