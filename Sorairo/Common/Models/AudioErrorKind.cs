@@ -6,4 +6,5 @@ public enum AudioErrorKind
     SoundInitFailed,
     SoundStartFailed,
     SetEndCallbackFailed,
+    GetDataFormatFailed,
 }

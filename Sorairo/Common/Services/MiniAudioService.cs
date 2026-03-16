@@ -24,6 +24,7 @@ public sealed class MiniAudioService : IAudioService
     private GCHandle selfHandle;
     private bool isSoundLoaded;
     private CancellationTokenSource? cts;
+    private uint sampleRate;
 
     public event Action? SoundEnded;
     public bool IsPlaying => audioState.Status == AudioPlaybackStatus.Playing;
@@ -110,6 +111,25 @@ public sealed class MiniAudioService : IAudioService
                 "Failed to set end callback"
             );
         }
+        if (
+            MiniAudioNative.ma_sound_get_data_format(
+                maSoundHandle,
+                out _,
+                out _,
+                out sampleRate,
+                0,
+                0
+            ) != ma_result.success
+        )
+        {
+            UnloadSound();
+            FreeMaSoundHandle();
+            FreeSelfHandle();
+            return new AudioError(
+                AudioErrorKind.GetDataFormatFailed,
+                "Failed to get sound data format"
+            );
+        }
         audioState.Status = AudioPlaybackStatus.Playing;
         audioState.TotalTime = GetTotalTime();
         audioState.ElapsedTime = GetElapsedTime();
@@ -119,8 +139,25 @@ public sealed class MiniAudioService : IAudioService
 
     public void Seek(TimeSpan time)
     {
-        audioState.ElapsedTime = time;
-        MiniAudioNative.ma_sound_seek_to_second(maSoundHandle, (float)time.TotalSeconds);
+        if (
+            sampleRate == 0
+            && MiniAudioNative.ma_sound_get_data_format(
+                maSoundHandle,
+                out _,
+                out _,
+                out sampleRate,
+                0,
+                0
+            ) != ma_result.success
+        )
+        {
+            return;
+        }
+        var frame = (ulong)(time.TotalSeconds * sampleRate);
+        if (MiniAudioNative.ma_sound_seek_to_pcm_frame(maSoundHandle, frame) == ma_result.success)
+        {
+            audioState.ElapsedTime = time;
+        }
     }
 
     private async Task StartTrackingElapsedSecondsAsync()
@@ -155,6 +192,7 @@ public sealed class MiniAudioService : IAudioService
 
     public void Stop()
     {
+        sampleRate = 0;
         if (cts is not null)
         {
             cts.Cancel();
@@ -272,4 +310,14 @@ public sealed class MiniAudioService : IAudioService
 
     [DllImport("miniaudioex", CallingConvention = CallingConvention.Cdecl)]
     public static extern ma_result ma_fence_wait(ma_fence_ptr ptr);
+
+    [DllImport("miniaudioex", CallingConvention = CallingConvention.Cdecl)]
+    public static extern ma_result ma_sound_get_data_format(
+        ma_sound_ptr pSound,
+        out ma_format pFormat,
+        out uint pChannels,
+        out uint pSampleRate,
+        IntPtr pChannelMap,
+        size_t channelMapCap
+    );
 }
