@@ -1,0 +1,3 @@
+[submodule "sorairo-fltk/vendor/miniaudio"]
+	path = sorairo-fltk/vendor/miniaudio
+	url = https://github.com/mackron/miniaudio.git

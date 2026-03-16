@@ -1,0 +1,17 @@
+use thiserror::Error;
+
+use crate::audio::sys::MaResult;
+
+#[derive(Error, Debug)]
+pub enum AppError {
+    #[error(transparent)]
+    Audio(#[from] AudioError),
+}
+
+#[derive(Error, Debug)]
+pub enum AudioError {
+    #[error("failed to initialize audio engine: {0}")]
+    EngineInit(MaResult),
+    #[error("failed to play sound: {0}")]
+    PlaySound(MaResult),
+}
