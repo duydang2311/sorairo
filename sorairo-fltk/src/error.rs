@@ -1,6 +1,6 @@
 use thiserror::Error;
 
-use crate::audio::sys::MaResult;
+use crate::common::audio::sys::MaResult;
 
 #[derive(Error, Debug)]
 pub enum AppError {

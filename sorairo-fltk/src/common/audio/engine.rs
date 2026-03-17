@@ -1,7 +1,7 @@
 use std::ffi::CString;
 
 use crate::{
-    audio::sys::{MaResult, ma_engine, ma_engine_init, ma_engine_play_sound, ma_engine_uninit},
+    common::audio::sys::{MaResult, ma_engine, ma_engine_init, ma_engine_play_sound, ma_engine_uninit},
     error::{AppError, AudioError},
 };
 
