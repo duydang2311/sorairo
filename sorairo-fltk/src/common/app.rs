@@ -1,3 +1,5 @@
+use std::cell::RefCell;
+
 use crate::common::{audio::service::AudioService, event::EventBus};
 
 #[derive(Debug, Clone)]
@@ -8,7 +10,13 @@ pub struct AppContext {
 
 #[derive(Debug, Clone)]
 pub struct PlaylistState {
+    inner: Rc<RefCell<PlaylistStateInner>>
+}
+
+#[derive(Debug, Clone)]
+pub struct PlaylistStateInner {
     pub items: Vec<PlaylistItem>,
+    pub current_item: Option<PlaylistItem>,
 }
 
 #[derive(Debug, Clone)]
