@@ -6,10 +6,7 @@ use fltk::{
     prelude::*,
 };
 
-use crate::common::{
-    app::AppContext,
-    event::{FileOpened, SubscriptionTracker},
-};
+use crate::common::{AppContext, FileOpened, SubscriptionTracker};
 
 pub struct NowPlayingView {
     ctx: AppContext,

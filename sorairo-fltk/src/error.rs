@@ -14,4 +14,8 @@ pub enum AudioError {
     EngineInit(MaResult),
     #[error("failed to play sound: {0}")]
     PlaySound(MaResult),
+    #[error("failed to init sound: {0}")]
+    InitSound(MaResult),
+    #[error("failed to start sound: {0}")]
+    StartSound(MaResult),
 }

@@ -5,7 +5,7 @@ use fltk::{
     prelude::{MenuExt, WidgetExt},
 };
 
-use crate::common::{app::AppContext, event::FileOpened};
+use crate::common::{AppContext, FileOpened};
 
 pub struct MenuBarView {
     pub menu: SysMenuBar,

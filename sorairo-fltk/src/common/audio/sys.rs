@@ -1,5 +1,5 @@
 use std::{
-    ffi::{CString, c_char, c_int, c_void},
+    ffi::{CString, c_char, c_int, c_ushort, c_void},
     fmt::Display,
     mem::MaybeUninit,
     sync::atomic::{AtomicU32, AtomicU64},
@@ -91,10 +91,12 @@ impl Display for MaResult {
     }
 }
 
+pub type ma_handle = *mut ::std::os::raw::c_void;
 pub type ma_uint32 = u32;
 pub type ma_uint64 = u64;
 pub type ma_bool8 = u8;
 pub type ma_bool32 = u32;
+pub type ma_event = ma_handle;
 pub type ma_sound_end_proc =
     Option<unsafe extern "C" fn(p_sound: *mut ma_sound, user_data: *mut c_void)>;
 
@@ -109,9 +111,10 @@ pub struct ma_engine_config {
     _private: [u8; 0],
 }
 
-#[repr(C)]
+#[repr(C, align(8))]
+#[derive(Copy, Clone)]
 pub struct ma_engine_node {
-    _private: [u8; 0],
+    _private: [u8; 952],
 }
 
 #[repr(C)]
@@ -129,10 +132,29 @@ pub struct ma_sound_group {
     _private: [u8; 0],
 }
 
-#[repr(C)]
+#[repr(C, align(8))]
+#[derive(Copy, Clone)]
 pub struct ma_sound {
-    _private: [u8; 0],
+    _private: [u8; 1024],
 }
+
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct ma_fence {
+    pub e: ma_event,
+    pub counter: ma_uint32,
+}
+
+pub const MA_SOUND_FLAG_STREAM: ma_sound_flags = 1;
+pub const MA_SOUND_FLAG_DECODE: ma_sound_flags = 2;
+pub const MA_SOUND_FLAG_ASYNC: ma_sound_flags = 4;
+pub const MA_SOUND_FLAG_WAIT_INIT: ma_sound_flags = 8;
+pub const MA_SOUND_FLAG_UNKNOWN_LENGTH: ma_sound_flags = 16;
+pub const MA_SOUND_FLAG_LOOPING: ma_sound_flags = 32;
+pub const MA_SOUND_FLAG_NO_DEFAULT_ATTACHMENT: ma_sound_flags = 4096;
+pub const MA_SOUND_FLAG_NO_PITCH: ma_sound_flags = 8192;
+pub const MA_SOUND_FLAG_NO_SPATIALIZATION: ma_sound_flags = 16384;
+pub type ma_sound_flags = c_int;
 
 unsafe extern "C" {
     pub unsafe fn ma_engine_config_init() -> ma_engine_config;
@@ -146,4 +168,23 @@ unsafe extern "C" {
         path: *const c_char,
         group: *mut ma_sound_group,
     ) -> MaResult;
+    pub unsafe fn ma_sound_init_from_file(
+        pEngine: *mut ma_engine,
+        pFilePath: *const c_char,
+        flags: ma_sound_flags,
+        pGroup: *mut ma_sound_group,
+        pDoneFence: *mut ma_fence,
+        pSound: *mut ma_sound,
+    ) -> MaResult;
+    pub unsafe fn ma_sound_init_from_file_w(
+        pEngine: *mut ma_engine,
+        pFilePath: *const c_ushort,
+        flags: ma_sound_flags,
+        pGroup: *mut ma_sound_group,
+        pDoneFence: *mut ma_fence,
+        pSound: *mut ma_sound,
+    ) -> MaResult;
+    pub unsafe fn ma_sound_uninit(pSound: *mut ma_sound);
+    pub unsafe fn ma_sound_start(pSound: *mut ma_sound) -> MaResult;
+    pub unsafe fn ma_sound_stop(pSound: *mut ma_sound) -> MaResult;
 }

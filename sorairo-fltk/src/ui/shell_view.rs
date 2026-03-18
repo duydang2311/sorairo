@@ -1,12 +1,11 @@
 use fltk::{
-    frame::Frame,
     group,
     prelude::{GroupExt, WidgetBase, WidgetExt},
     window::{self, Window},
 };
 
 use crate::{
-    common::{app::AppContext, event::SubscriptionTracker},
+    common::{AppContext, SubscriptionTracker},
     ui::{NowPlayingView, menu_bar_view::MenuBarView},
 };
 
