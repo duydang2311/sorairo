@@ -27,15 +27,17 @@ impl NowPlayingView {
             container.end();
         }
 
-        let container_rc_clone = container_rc.clone();
-        tracker.add(ctx.bus.subscribe::<FileOpened>(move |opened| {
-            let mut container = container_rc_clone.borrow_mut();
-            container.clear();
+        tracker.add(ctx.bus.subscribe::<FileOpened>({
+            let container_rc = container_rc.clone();
+            move |opened| {
+                let mut container = container_rc.borrow_mut();
+                container.clear();
 
-            container.begin();
-            let mut frame = Frame::default_fill();
-            frame.set_label(&opened.path.to_string_lossy());
-            container.end();
+                container.begin();
+                let mut frame = Frame::default_fill();
+                frame.set_label(&opened.path.to_string_lossy());
+                container.end();
+            }
         }));
 
         Self {
