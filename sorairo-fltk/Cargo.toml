@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+alien-signals = "0.1.4"
 fltk = { version = "^1.5", features = ["fltk-bundled"] }
 thiserror = "2.0.18"
 

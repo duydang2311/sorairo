@@ -18,4 +18,6 @@ pub enum AudioError {
     InitSound(MaResult),
     #[error("failed to start sound: {0}")]
     StartSound(MaResult),
+    #[error("failed to stop sound: {0}")]
+    StopSound(MaResult),
 }

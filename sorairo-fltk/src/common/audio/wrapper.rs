@@ -26,10 +26,7 @@ pub fn init_audio_engine() -> Result<Box<ma_engine>, AppError> {
 pub fn init_sound_from_file(engine: &mut ma_engine, path: &str) -> Result<Box<ma_sound>, AppError> {
     unsafe {
         let mut sound = Box::<ma_sound>::new(std::mem::zeroed());
-        let flags = MA_SOUND_FLAG_STREAM
-            | MA_SOUND_FLAG_ASYNC
-            | MA_SOUND_FLAG_NO_PITCH
-            | MA_SOUND_FLAG_NO_SPATIALIZATION;
+        let flags = MA_SOUND_FLAG_STREAM | MA_SOUND_FLAG_NO_PITCH | MA_SOUND_FLAG_NO_SPATIALIZATION;
         let result = match env::consts::OS {
             "windows" => {
                 let mut path: Vec<u16> = path.encode_utf16().collect();

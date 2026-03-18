@@ -50,7 +50,7 @@ impl EventBus {
         let mut handlers = self.handlers.borrow_mut();
         for handlers in handlers.values_mut() {
             if let Some(pos) = handlers.iter().position(|(h_id, _)| *h_id == id) {
-                handlers.remove(pos);
+                _ = handlers.swap_remove(pos);
                 return true;
             }
         }

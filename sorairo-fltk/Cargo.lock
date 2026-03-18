@@ -12,6 +12,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "alien-signals"
+version = "0.1.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d82735d897acf30d6af48e7bbd2f76f0104cf4c13f2f1a71ebb1f2c655902521"
+
+[[package]]
 name = "bindgen"
 version = "0.72.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -286,6 +292,7 @@ checksum = "0fda2ff0d084019ba4d7c6f371c95d8fd75ce3524c3cb8fb653a3023f6323e64"
 name = "sorairo-fltk"
 version = "0.1.0"
 dependencies = [
+ "alien-signals",
  "bindgen",
  "cc",
  "fltk",

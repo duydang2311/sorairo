@@ -10,7 +10,7 @@ use crate::{
     error::AppError,
 };
 
-static PLAYLIST_ITEM_NEXT_ID: AtomicUsize = AtomicUsize::new(1);
+static TRACK_NEXT_ID: AtomicUsize = AtomicUsize::new(1);
 
 #[derive(Clone)]
 pub struct PlaylistService {
@@ -39,17 +39,17 @@ pub struct Track {
 }
 
 pub struct PlaylistCurrentTrackChanged {
-    track: Option<Track>,
+    pub track: Option<Track>,
 }
 
 pub struct TrackPlayed {
-    track: Track,
+    pub track: Track,
 }
 
 impl Track {
     pub fn new(path: PathBuf) -> Self {
         Track {
-            id: PLAYLIST_ITEM_NEXT_ID.fetch_add(1, Ordering::Relaxed),
+            id: TRACK_NEXT_ID.fetch_add(1, Ordering::Relaxed),
             path,
             ..Default::default()
         }
@@ -84,11 +84,7 @@ impl PlaylistService {
             .current_track
             .as_ref()
             .expect("failed to get current track");
-        self.audio_service
-            .play_sound(&track.path.to_string_lossy())?;
-        self.event_bus.publish(TrackPlayed {
-            track: track.clone(),
-        });
+        self.audio_service.play(&track.path.to_string_lossy())?;
         Ok(())
     }
 }
