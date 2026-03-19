@@ -202,6 +202,8 @@ public sealed class MiniAudioService : IAudioService
             cts = null;
         }
         audioState.Status = AudioPlaybackStatus.None;
+        audioState.ElapsedTime = TimeSpan.Zero;
+        audioState.TotalTime = TimeSpan.Zero;
         UnloadSound();
         FreeMaSoundHandle();
         FreeSelfHandle();

@@ -53,6 +53,7 @@ public sealed partial class MainMenuViewModel(IPlaylistService playlistService, 
     [RelayCommand]
     private void NewPlaylist()
     {
+        playlistService.SetCurrentItem(null);
         playlistService.Stop();
         playlistService.Clear();
     }
