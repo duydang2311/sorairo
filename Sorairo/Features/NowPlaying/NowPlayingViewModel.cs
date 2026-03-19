@@ -39,7 +39,26 @@ public sealed partial class NowPlayingViewModel(
             )
             .Subscribe(status => VolumeStatus = status)
             .AddTo(ref disposables);
+        audioState
+            .ObservePropertyChanged(a => a.ElapsedTime)
+            .CombineLatest(
+                this.ObservePropertyChanged(vm => vm.IsSeeking),
+                (elapsedTime, isSeeking) => (elapsedTime.TotalSeconds, IsSeeking: isSeeking)
+            )
+            .Select(tuple => (tuple.TotalSeconds, tuple.IsSeeking))
+            .Subscribe(tuple =>
+            {
+                if (tuple.IsSeeking)
+                {
+                    return;
+                }
+                ElapsedSeconds = tuple.TotalSeconds;
+            })
+            .AddTo(ref disposables);
     }
+
+    [ObservableProperty]
+    private double elapsedSeconds;
 
     [ObservableProperty]
     private bool isSeeking;

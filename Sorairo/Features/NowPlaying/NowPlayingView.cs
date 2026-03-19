@@ -1,6 +1,8 @@
 using Avalonia;
 using Avalonia.Animation;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
+using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
@@ -8,6 +10,8 @@ using Avalonia.Markup.Xaml.MarkupExtensions;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Styling;
+using Avalonia.Threading;
+using Avalonia.VisualTree;
 using R3;
 using Sorairo.Common.Helpers;
 using Sorairo.Common.Models;
@@ -139,13 +143,21 @@ public sealed class NowPlayingView(
                                 IsVisible = frontCoverImage is not null,
                                 CornerRadius = new CornerRadius(8),
                                 ClipToBounds = true,
-                                Child = new Image { Source = frontCoverImage }.Bind(
-                                    FluentBinding.OneWay(
-                                        vm,
-                                        vm => vm.FrontCoverStretch,
-                                        Image.StretchProperty
+                                Child = new Image { Source = frontCoverImage }
+                                    .Bind(
+                                        FluentBinding.OneWay(
+                                            vm,
+                                            vm => vm.FrontCoverStretch,
+                                            Image.StretchProperty
+                                        )
                                     )
-                                ),
+                                    .Do(image =>
+                                    {
+                                        RenderOptions.SetBitmapInterpolationMode(
+                                            image,
+                                            BitmapInterpolationMode.HighQuality
+                                        );
+                                    }),
                             }.GridRow(0),
                             new Button
                             {
@@ -463,34 +475,28 @@ public sealed class NowPlayingView(
         var elapsedSlider = new Slider { Margin = new Thickness(0, -8, 0, 0), Minimum = 0 }
             .Bind(
                 FluentBinding
-                    .Bind(audioState, a => a.TotalTime, Slider.MaximumProperty)
-                    .Mode(BindingMode.OneWay)
+                    .OneWay(audioState, a => a.TotalTime, Slider.MaximumProperty)
                     .Convert(a => Math.Max(1, a.TotalSeconds))
             )
-            .Bind(
-                FluentBinding
-                    .Bind(audioState, a => a.ElapsedTime, Slider.ValueProperty)
-                    .Mode(BindingMode.OneWay)
-                    .Convert(a => a.TotalSeconds)
-            )
-            .Bind(
-                FluentBinding
-                    .Bind(vm, a => a.IsSeeking, Slider.TransitionsProperty)
-                    .Mode(BindingMode.OneWay)
-                    .Convert(isSeeking =>
-                    {
-                        return isSeeking
-                            ? null
-                            : new Transitions
-                            {
-                                new DoubleTransition
-                                {
-                                    Property = Slider.ValueProperty,
-                                    Duration = TimeSpan.FromMilliseconds(250),
-                                },
-                            };
-                    })
-            );
+            .Bind(FluentBinding.OneWay(vm, a => a.ElapsedSeconds, Slider.ValueProperty));
+        // .Bind(
+        //     FluentBinding
+        //         .OneWay(vm, a => a.IsSeeking, Slider.TransitionsProperty)
+        //         .Convert(isSeeking =>
+        //         {
+        //             return null;
+        //             return isSeeking
+        //                 ? null
+        //                 : new Transitions
+        //                 {
+        //                     new DoubleTransition
+        //                     {
+        //                         Property = Slider.ValueProperty,
+        //                         Duration = TimeSpan.FromMilliseconds(250),
+        //                     },
+        //                 };
+        //         })
+        // );
         elapsedSlider.AddHandler(
             Slider.PointerPressedEvent,
             (_, _) =>

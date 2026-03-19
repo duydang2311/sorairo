@@ -12,7 +12,7 @@ namespace Sorairo.Common.Services;
 
 public sealed class MiniAudioService : IAudioService
 {
-    private static ma_sound_flags soundInitFlags =>
+    private static ma_sound_flags SoundInitFlags =>
         ma_sound_flags.stream
         | ma_sound_flags.no_pitch
         | ma_sound_flags.no_spatialization
@@ -62,7 +62,7 @@ public sealed class MiniAudioService : IAudioService
             ? MiniAudioNative.ma_sound_init_from_file_w(
                 maEngine.Handle,
                 path.LocalPath,
-                soundInitFlags,
+                SoundInitFlags,
                 default,
                 default,
                 maSoundHandle
@@ -70,7 +70,7 @@ public sealed class MiniAudioService : IAudioService
             : MiniAudioNative.ma_sound_init_from_file(
                 maEngine.Handle,
                 path.LocalPath,
-                soundInitFlags,
+                SoundInitFlags,
                 default,
                 default,
                 maSoundHandle
@@ -172,7 +172,7 @@ public sealed class MiniAudioService : IAudioService
         using var timer = new PeriodicTimer(TimeSpan.FromMilliseconds(250));
         try
         {
-            object state = ((IAudioService)this, audioState);
+            var state = (object)(this, audioState);
             while (await timer.WaitForNextTickAsync(ct))
             {
                 if (audioState.Status != AudioPlaybackStatus.Playing)
@@ -182,7 +182,7 @@ public sealed class MiniAudioService : IAudioService
                 Dispatcher.UIThread.Post(
                     static (state) =>
                     {
-                        var (audioService, audioState) = ((IAudioService, AudioState))state!;
+                        var (audioService, audioState) = ((MiniAudioService, AudioState))state!;
                         audioState.ElapsedTime = audioService.GetElapsedTime();
                     },
                     state

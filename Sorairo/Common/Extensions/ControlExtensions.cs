@@ -100,4 +100,11 @@ public static class ControlExtensions
         Avalonia.Controls.ToolTip.SetTip(control, value);
         return control;
     }
+
+    public static T Do<T>(this T control, Action<T> fn)
+        where T : Control
+    {
+        fn(control);
+        return control;
+    }
 }
