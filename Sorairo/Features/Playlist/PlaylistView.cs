@@ -98,7 +98,6 @@ public sealed class PlaylistView(PlaylistViewModel vm, PlaylistState playlistSta
         {
             if (rowDisposables.Remove(e.Row, out var disposable))
             {
-                Console.WriteLine("Dispose " + e.Row.Index);
                 disposable.Dispose();
             }
         };

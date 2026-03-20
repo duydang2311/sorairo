@@ -169,7 +169,7 @@ public sealed class MiniAudioService : IAudioService
         }
         cts = new CancellationTokenSource();
         var ct = cts.Token;
-        using var timer = new PeriodicTimer(TimeSpan.FromMilliseconds(250));
+        using var timer = new PeriodicTimer(TimeSpan.FromMilliseconds(200));
         try
         {
             var state = (object)(this, audioState);
@@ -185,7 +185,8 @@ public sealed class MiniAudioService : IAudioService
                         var (audioService, audioState) = ((MiniAudioService, AudioState))state!;
                         audioState.ElapsedTime = audioService.GetElapsedTime();
                     },
-                    state
+                    state,
+                    DispatcherPriority.Render
                 );
             }
         }

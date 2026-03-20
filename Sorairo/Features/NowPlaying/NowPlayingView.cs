@@ -338,46 +338,52 @@ public sealed class NowPlayingView(
         };
     }
 
-    private ProgressBar ElapsedProgressBar()
+    private Panel ElapsedProgressBar()
     {
-        var progressBar = new ProgressBar { Margin = new Thickness(0, -8, 0, 0), Minimum = 0 }
+        var progressBar = new TrackProgressBar { Height = 8, Minimum = 0 }
             .Bind(
                 FluentBinding
-                    .OneWay(audioState, a => a.TotalTime, ProgressBar.MaximumProperty)
+                    .OneWay(audioState, a => a.TotalTime, TrackProgressBar.MaximumProperty)
                     .Convert(a => Math.Max(1, a.TotalSeconds))
             )
-            .Bind(FluentBinding.OneWay(vm, a => a.ElapsedSeconds, ProgressBar.ValueProperty));
-        progressBar.PointerPressed += (sender, e) =>
+            .Bind(FluentBinding.OneWay(vm, a => a.ElapsedSeconds, TrackProgressBar.ValueProperty))
+            .BindResource(TrackProgressBar.BackgroundProperty, "PrimaryFgBrush");
+        var panel = new Panel
         {
-            var progressBar = (ProgressBar)sender!;
+            Children =
+            {
+                new Border { }.BindResource(BackgroundProperty, "BaseBrush"),
+                progressBar,
+            },
+        };
+        panel.PointerPressed += (sender, e) =>
+        {
             vm.IsSeeking = true;
             progressBar.Value = GetDragValue(progressBar, e);
         };
-        progressBar.PointerMoved += (sender, e) =>
+        panel.PointerMoved += (sender, e) =>
         {
             if (vm.IsSeeking)
             {
-                var progressBar = (ProgressBar)sender!;
                 progressBar.Value = GetDragValue(progressBar, e);
             }
         };
-        progressBar.PointerReleased += (sender, e) =>
+        panel.PointerReleased += (sender, e) =>
         {
             if (vm.IsSeeking)
             {
-                var progressBar = (ProgressBar)sender!;
                 progressBar.Value = GetDragValue(progressBar, e);
                 vm.SeekCommand.Execute(progressBar.Value);
                 vm.IsSeeking = false;
             }
         };
-        static double GetDragValue(ProgressBar progressBar, PointerEventArgs e)
+        static double GetDragValue(TrackProgressBar progressBar, PointerEventArgs e)
         {
             var position = e.GetPosition(progressBar);
             var percent = Math.Min(Math.Max(0, position.X) / progressBar.Bounds.Width, 1);
             return percent * progressBar.Maximum;
         }
-        return progressBar;
+        return panel;
     }
 
     private Grid ElapsedTexts()
