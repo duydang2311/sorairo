@@ -30,6 +30,6 @@ Ran on my win-x64 with the following results:
 | Startup time             | ~1s     |
 | Memory usage (startup)   | ~35 MB  |
 | Memory usage (20 songs)  | ~43 MB  |
-| Memory usage (playback)  | ~60 MB  |
-| CPU usage (idle)         | ~0 %    |
-| CPU usage (playback)     | ~0.8 %  |
+| Memory usage (playback)  | ~50 MB  |
+| CPU usage (idle)         | ~0%    |
+| CPU usage (playback)     | ~0.5%  |
