@@ -134,7 +134,7 @@
             <Setter Property="Background" Value="{DynamicResource PrimaryFgBrush}" />
             <Setter Property="Width" Value="10" />
             <Setter Property="Height" Value="10" />
-            <Setter Property="CornerRadius" Value="1" />
+            <Setter Property="CornerRadius" Value="5" />
         </Style>
     </ControlTheme>
 </ResourceDictionary>
