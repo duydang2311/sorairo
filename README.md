@@ -19,6 +19,7 @@ I've pulled the first usable cross-platform version recently. And there are lots
 - [ ] Drag and drop songs
 - [ ] Audio normalization (embedded rsgain)
 - [ ] Release packaging (Velopack)
+- [x] Light & dark mode
 
 ## Performance
 
