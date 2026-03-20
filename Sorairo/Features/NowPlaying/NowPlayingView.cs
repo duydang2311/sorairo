@@ -5,7 +5,6 @@ using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Markup.Xaml.MarkupExtensions;
 using Avalonia.Media;
-using Avalonia.Media.Imaging;
 using Avalonia.Styling;
 using R3;
 using Sorairo.Common.Helpers;
@@ -98,146 +97,11 @@ public sealed class NowPlayingView(
                     FluentBinding
                         .Bind(playlistState, a => a.CurrentTrack, ContentProperty)
                         .Mode(BindingMode.OneWay)
-                        .Convert(item =>
+                        .Convert(track =>
                         {
-                            if (frontCoverImage is not null)
-                            {
-                                frontCoverImage.Dispose();
-                                frontCoverImage = null;
-                            }
-                            return item is null ? null : PlayingView(item);
+                            return track is null ? null : new TrackView(new TrackViewModel(track));
                         })
                 ),
-            },
-        };
-    }
-
-    Bitmap? frontCoverImage;
-
-    private Border PlayingView(Track item)
-    {
-        if (frontCoverImage is not null)
-        {
-            frontCoverImage.Dispose();
-            frontCoverImage = null;
-        }
-        var frontCover = item.GetFrontCover();
-        if (frontCover is not null)
-        {
-            using var ms = new MemoryStream(frontCover);
-            frontCoverImage = new Bitmap(ms);
-        }
-        return new Border
-        {
-            Padding = new Thickness(16),
-            Child = new Grid
-            {
-                RowDefinitions = new RowDefinitions("*,Auto,Auto,Auto"),
-                VerticalAlignment = VerticalAlignment.Center,
-                Children =
-                {
-                    new Panel
-                    {
-                        HorizontalAlignment = HorizontalAlignment.Center,
-                        VerticalAlignment = VerticalAlignment.Center,
-                        Children =
-                        {
-                            new Border
-                            {
-                                IsVisible = frontCoverImage is not null,
-                                CornerRadius = new CornerRadius(8),
-                                ClipToBounds = true,
-                                Child = new Image { Source = frontCoverImage }
-                                    .Bind(
-                                        FluentBinding.OneWay(
-                                            vm,
-                                            vm => vm.FrontCoverStretch,
-                                            Image.StretchProperty
-                                        )
-                                    )
-                                    .Do(image =>
-                                    {
-                                        RenderOptions.SetBitmapInterpolationMode(
-                                            image,
-                                            BitmapInterpolationMode.HighQuality
-                                        );
-                                    }),
-                            }.GridRow(0),
-                            new Button
-                            {
-                                VerticalAlignment = VerticalAlignment.Bottom,
-                                HorizontalAlignment = HorizontalAlignment.Right,
-                                Padding = new Thickness(4),
-                                MaxHeight = Icons.MD + 8,
-                                Margin = new Thickness(0, 0, 0, -Icons.MD - 8 - 4),
-                                Content = new PathIcon
-                                {
-                                    Width = Icons.MD,
-                                    Height = Icons.MD,
-                                    Data = Icons.Fill16,
-                                }
-                                    .Bind(
-                                        FluentBinding
-                                            .OneWay(
-                                                vm,
-                                                vm => vm.FrontCoverStretch,
-                                                PathIcon.DataProperty
-                                            )
-                                            .Convert(stretch =>
-                                                stretch switch
-                                                {
-                                                    Stretch.UniformToFill => Icons.Fill16Filled,
-                                                    _ => Icons.Fill16,
-                                                }
-                                            )
-                                    )
-                                    .Bind(
-                                        FluentBinding
-                                            .OneWay(
-                                                vm,
-                                                vm => vm.FrontCoverStretch,
-                                                ToolTip.TipProperty
-                                            )
-                                            .Convert(stretch =>
-                                                stretch switch
-                                                {
-                                                    Stretch.UniformToFill => "Original size",
-                                                    _ => "Fit to window",
-                                                }
-                                            )
-                                    ),
-                                Command = vm.ToggleFrontCoverStretchCommand,
-                            },
-                        },
-                    },
-                    new TextBlock
-                    {
-                        Text = "Now Playing",
-                        Margin = new Thickness(0, 8, 0, 0),
-                        FontSize = 10,
-                    }
-                        .GridRow(1)
-                        .BindResource(ForegroundProperty, "FgMutedBrush"),
-                    new TextBlock
-                    {
-                        Text = item.Title,
-                        Margin = new Thickness(0, 4, 0, 0),
-                        IsVisible = !string.IsNullOrEmpty(item.Title),
-                        FontSize = 18,
-                        FontWeight = FontWeight.Medium,
-                        TextWrapping = TextWrapping.WrapWithOverflow,
-                    }
-                        .GridRow(2)
-                        .BindResource(ForegroundProperty, "FgEmphBrush"),
-                    new TextBlock
-                    {
-                        Text = item.Artist,
-                        Margin = new Thickness(0, 4, 0, 0),
-                        FontWeight = FontWeight.SemiBold,
-                    }
-                        .GridRow(3)
-                        .BindResource(ForegroundProperty, "PrimaryFgBrush"),
-                },
             },
         };
     }
@@ -548,19 +412,6 @@ public sealed class NowPlayingView(
     protected override void OnActivated(ref DisposableBag disposables)
     {
         vm.Activate(ref disposables);
-        disposables.Add(
-            Disposable.Create(
-                frontCoverImage,
-                static (frontCoverImage) =>
-                {
-                    if (frontCoverImage is not null)
-                    {
-                        frontCoverImage.Dispose();
-                        frontCoverImage = null;
-                    }
-                }
-            )
-        );
         playlistState
             .ObservePropertyChanged(state => state.RepeatMode)
             .Subscribe(mode =>

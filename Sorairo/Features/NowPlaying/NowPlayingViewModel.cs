@@ -66,9 +66,6 @@ public sealed partial class NowPlayingViewModel(
     [ObservableProperty]
     private VolumeStatus volumeStatus;
 
-    [ObservableProperty]
-    private Stretch frontCoverStretch = Stretch.UniformToFill;
-
     [RelayCommand]
     private void TogglePlayback()
     {
@@ -122,16 +119,6 @@ public sealed partial class NowPlayingViewModel(
     private void ToggleRepeatMode()
     {
         playlistService.ToggleRepeatMode();
-    }
-
-    [RelayCommand]
-    private void ToggleFrontCoverStretch()
-    {
-        FrontCoverStretch = FrontCoverStretch switch
-        {
-            Stretch.UniformToFill => Stretch.Uniform,
-            _ => Stretch.UniformToFill,
-        };
     }
 
     private bool CanSkip()
