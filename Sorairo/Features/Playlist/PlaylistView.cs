@@ -1,10 +1,10 @@
+using System.Runtime.CompilerServices;
 using Ardalis.GuardClauses;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Data.Converters;
 using Avalonia.Input;
-using ObservableCollections;
 using R3;
 using Sorairo.Common.Helpers;
 using Sorairo.Common.Models;
@@ -15,6 +15,8 @@ namespace Sorairo.Features.Playlist;
 public sealed class PlaylistView(PlaylistViewModel vm, PlaylistState playlistState)
     : ActivatableView
 {
+    private readonly ConditionalWeakTable<DataGridRow, IDisposable> rowDisposables = [];
+
     protected override void Init()
     {
         Content = CreateDataGrid();
@@ -23,13 +25,25 @@ public sealed class PlaylistView(PlaylistViewModel vm, PlaylistState playlistSta
     protected override void OnActivated(ref DisposableBag disposables)
     {
         vm.Activate(ref disposables);
+        disposables.Add(
+            Disposable.Create(
+                this,
+                static state =>
+                {
+                    foreach (var (_, disposable) in state.rowDisposables)
+                    {
+                        disposable.Dispose();
+                    }
+                    state.rowDisposables.Clear();
+                }
+            )
+        );
     }
 
     private DataGrid CreateDataGrid()
     {
         var dataGrid = new DataGrid
         {
-            ItemsSource = vm.Items,
             IsReadOnly = true,
             CanUserSortColumns = true,
             Columns =
@@ -59,24 +73,36 @@ public sealed class PlaylistView(PlaylistViewModel vm, PlaylistState playlistSta
                 },
             },
         }
-            .Bind(FluentBinding.OneWay(vm, vm => vm.Items, DataGrid.ItemsSourceProperty))
+            .Bind(FluentBinding.OneWay(vm, vm => vm.Tracks, DataGrid.ItemsSourceProperty))
             .BindResource(DataGrid.VerticalGridLinesBrushProperty, "SurfaceBorderBrush");
         dataGrid.LoadingRow += (_, e) =>
         {
             var item = (Track)e.Row.DataContext!;
             e.Row.DoubleTapped += OnRowDoubleTapped;
-            e.Row.BindClass(
-                "active",
-                new Binding(nameof(PlaylistState.CurrentTrack), BindingMode.OneWay)
-                {
-                    Source = playlistState,
-                    Converter = new FuncValueConverter<Track?, bool>(current =>
-                        current is not null && item.Id == current.Id
-                    ),
-                },
-                e.Row
+            rowDisposables.Add(
+                e.Row,
+                e.Row.BindClass(
+                    "active",
+                    new Binding(nameof(PlaylistState.CurrentTrack), BindingMode.OneWay)
+                    {
+                        Source = playlistState,
+                        Converter = new FuncValueConverter<Track?, bool>(current =>
+                            current is not null && item.Id == current.Id
+                        ),
+                    },
+                    e.Row
+                )
             );
         };
+        dataGrid.UnloadingRow += (_, e) =>
+        {
+            if (rowDisposables.Remove(e.Row, out var disposable))
+            {
+                Console.WriteLine("Dispose " + e.Row.Index);
+                disposable.Dispose();
+            }
+        };
+
         return dataGrid;
     }
 
