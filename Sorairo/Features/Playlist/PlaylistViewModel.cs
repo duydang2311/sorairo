@@ -14,25 +14,25 @@ public sealed partial class PlaylistViewModel(
 ) : ActivatableViewModel
 {
     [ObservableProperty]
-    private INotifyCollectionChangedSynchronizedViewList<PlaylistItem>? items;
+    private INotifyCollectionChangedSynchronizedViewList<Track>? items;
 
     protected override void Init() { }
 
     protected override void OnActivated(ref DisposableBag disposables)
     {
-        Items = playlistState.Items.ToNotifyCollectionChangedSlim().AddTo(ref disposables);
+        Items = playlistState.Tracks.ToNotifyCollectionChangedSlim().AddTo(ref disposables);
     }
 
     [RelayCommand(CanExecute = nameof(CanPlay))]
-    private void Play(PlaylistItem item)
+    private void Play(Track item)
     {
-        playlistService.SetCurrentItem(item);
+        playlistService.SetCurrentTrack(item);
         var result = playlistService.Play();
         Console.WriteLine(result.Value);
     }
 
-    private bool CanPlay(PlaylistItem item)
+    private bool CanPlay(Track item)
     {
-        return playlistState.CurrentItem != item;
+        return playlistState.CurrentTrack != item;
     }
 }

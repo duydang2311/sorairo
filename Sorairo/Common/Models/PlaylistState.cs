@@ -5,10 +5,10 @@ namespace Sorairo.Common.Models;
 
 public sealed partial class PlaylistState : ObservableObject
 {
-    public ObservableList<PlaylistItem> Items { get; } = [];
+    public ObservableList<Track> Tracks { get; } = [];
 
     [ObservableProperty]
-    private PlaylistItem? currentItem;
+    private Track? currentTrack;
 
     [ObservableProperty]
     private RepeatMode repeatMode = RepeatMode.All;

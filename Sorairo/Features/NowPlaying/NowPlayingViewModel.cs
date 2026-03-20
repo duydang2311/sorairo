@@ -20,8 +20,8 @@ public sealed partial class NowPlayingViewModel(
     protected override void OnActivated(ref DisposableBag disposables)
     {
         playlistState
-            .ObservePropertyChanged(a => a.CurrentItem)
-            .Subscribe(item =>
+            .ObservePropertyChanged(a => a.CurrentTrack)
+            .Subscribe(_ =>
             {
                 SkipPreviousCommand.NotifyCanExecuteChanged();
                 SkipNextCommand.NotifyCanExecuteChanged();
@@ -136,6 +136,6 @@ public sealed partial class NowPlayingViewModel(
 
     private bool CanSkip()
     {
-        return playlistState.CurrentItem is not null;
+        return playlistState.CurrentTrack is not null;
     }
 }

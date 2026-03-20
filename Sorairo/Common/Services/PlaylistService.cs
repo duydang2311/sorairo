@@ -20,10 +20,10 @@ public sealed class PlaylistService : IPlaylistService
         audioService.SoundEnded += OnSoundEnded;
     }
 
-    public PlaylistItem AddItem(Uri path)
+    public Models.Track AddTrack(Uri path)
     {
-        var track = new Track(path.LocalPath);
-        var item = new PlaylistItem
+        var track = new ATL.Track(path.LocalPath);
+        var item = new Models.Track
         {
             Id = Guid.NewGuid(),
             Path = path,
@@ -31,13 +31,13 @@ public sealed class PlaylistService : IPlaylistService
             Title = track.Title,
             Album = track.Album,
         };
-        playlistState.Items.Add(item);
+        playlistState.Tracks.Add(item);
         return item;
     }
 
-    public void SetCurrentItem(PlaylistItem? item)
+    public void SetCurrentTrack(Models.Track? item)
     {
-        playlistState.CurrentItem = item;
+        playlistState.CurrentTrack = item;
     }
 
     public void SkipNext() => Move(1);
@@ -46,9 +46,9 @@ public sealed class PlaylistService : IPlaylistService
 
     public OneOf<PlaylistError, AudioError, Success> Play()
     {
-        if (playlistState.CurrentItem is null)
+        if (playlistState.CurrentTrack is null)
         {
-            if (playlistState.Items.Count == 0)
+            if (playlistState.Tracks.Count == 0)
             {
                 return new PlaylistError(PlaylistErrorKind.EmptyPlaylist, "Playlist is empty");
             }
@@ -57,17 +57,17 @@ public sealed class PlaylistService : IPlaylistService
                 var state = playlistState.Shuffle.State;
                 Guard.Against.Null(state);
                 var id = state.Ids[0];
-                var item = playlistState.Items.Find(a => a.Id == id);
+                var item = playlistState.Tracks.Find(a => a.Id == id);
                 Guard.Against.Null(item);
-                playlistState.CurrentItem = item;
+                playlistState.CurrentTrack = item;
             }
             else
             {
-                playlistState.CurrentItem = playlistState.Items[0];
+                playlistState.CurrentTrack = playlistState.Tracks[0];
             }
         }
         return audioService
-            .Play(playlistState.CurrentItem.Path)
+            .Play(playlistState.CurrentTrack.Path)
             .Match<OneOf<PlaylistError, AudioError, Success>>(a => a, a => a);
     }
 
@@ -78,7 +78,7 @@ public sealed class PlaylistService : IPlaylistService
 
     public void Clear()
     {
-        playlistState.Items.Clear();
+        playlistState.Tracks.Clear();
     }
 
     public void Dispose()
@@ -118,9 +118,9 @@ public sealed class PlaylistService : IPlaylistService
         switch (playlistState.RepeatMode)
         {
             case RepeatMode.None:
-                Guard.Against.Null(playlistState.CurrentItem);
-                var index = playlistState.Items.IndexOf(playlistState.CurrentItem);
-                if (index == playlistState.Items.Count - 1)
+                Guard.Against.Null(playlistState.CurrentTrack);
+                var index = playlistState.Tracks.IndexOf(playlistState.CurrentTrack);
+                if (index == playlistState.Tracks.Count - 1)
                 {
                     break;
                 }
@@ -143,15 +143,15 @@ public sealed class PlaylistService : IPlaylistService
         {
             case ShuffleMode.None:
                 playlistState.Shuffle.Mode = ShuffleMode.Shuffle;
-                var ids = playlistState.Items.Select(a => a.Id).ToList();
+                var ids = playlistState.Tracks.Select(a => a.Id).ToList();
                 for (int i = ids.Count - 1; i > 0; --i)
                 {
                     int j = Random.Shared.Next(i + 1);
                     (ids[i], ids[j]) = (ids[j], ids[i]);
                 }
-                if (playlistState.CurrentItem is not null)
+                if (playlistState.CurrentTrack is not null)
                 {
-                    var index = ids.FindIndex(a => a == playlistState.CurrentItem.Id);
+                    var index = ids.FindIndex(a => a == playlistState.CurrentTrack.Id);
                     (ids[0], ids[index]) = (ids[index], ids[0]);
                 }
                 playlistState.Shuffle.State = new ShuffleState(ids);
@@ -185,18 +185,18 @@ public sealed class PlaylistService : IPlaylistService
             var count = state.Ids.Count;
 
             var nextId = state.Ids[(index + delta + count) % count];
-            var item = Guard.Against.Null(playlistState.Items.Find(a => a.Id == nextId));
+            var item = Guard.Against.Null(playlistState.Tracks.Find(a => a.Id == nextId));
 
             state.CurrentId = nextId;
-            playlistState.CurrentItem = item;
+            playlistState.CurrentTrack = item;
         }
         else
         {
-            var current = Guard.Against.Null(playlistState.CurrentItem);
-            var index = playlistState.Items.IndexOf(current);
-            var count = playlistState.Items.Count;
+            var current = Guard.Against.Null(playlistState.CurrentTrack);
+            var index = playlistState.Tracks.IndexOf(current);
+            var count = playlistState.Tracks.Count;
 
-            playlistState.CurrentItem = playlistState.Items[(index + delta + count) % count];
+            playlistState.CurrentTrack = playlistState.Tracks[(index + delta + count) % count];
         }
     }
 }

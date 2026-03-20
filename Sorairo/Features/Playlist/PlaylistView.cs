@@ -37,22 +37,19 @@ public sealed class PlaylistView(PlaylistViewModel vm, PlaylistState playlistSta
                 new DataGridTextColumn
                 {
                     Header = "Artist",
-                    Binding = new Binding(nameof(PlaylistItem.Artist))
-                    {
-                        Mode = BindingMode.OneWay,
-                    },
+                    Binding = new Binding(nameof(Track.Artist)) { Mode = BindingMode.OneWay },
                     Width = new DataGridLength(1, DataGridLengthUnitType.Star),
                 },
                 new DataGridTextColumn
                 {
                     Header = "Title",
-                    Binding = new Binding(nameof(PlaylistItem.Title), BindingMode.OneWay),
+                    Binding = new Binding(nameof(Track.Title), BindingMode.OneWay),
                     Width = new DataGridLength(1, DataGridLengthUnitType.Star),
                 },
                 new DataGridTextColumn
                 {
                     Header = "File",
-                    Binding = new Binding(nameof(PlaylistItem.Path), BindingMode.OneWay)
+                    Binding = new Binding(nameof(Track.Path), BindingMode.OneWay)
                     {
                         Converter = new FuncValueConverter<Uri, string>(a =>
                             Path.GetFileName(Guard.Against.Null(a).LocalPath)
@@ -66,14 +63,14 @@ public sealed class PlaylistView(PlaylistViewModel vm, PlaylistState playlistSta
             .BindResource(DataGrid.VerticalGridLinesBrushProperty, "SurfaceBorderBrush");
         dataGrid.LoadingRow += (_, e) =>
         {
-            var item = (PlaylistItem)e.Row.DataContext!;
+            var item = (Track)e.Row.DataContext!;
             e.Row.DoubleTapped += OnRowDoubleTapped;
             e.Row.BindClass(
                 "active",
-                new Binding(nameof(PlaylistState.CurrentItem), BindingMode.OneWay)
+                new Binding(nameof(PlaylistState.CurrentTrack), BindingMode.OneWay)
                 {
                     Source = playlistState,
-                    Converter = new FuncValueConverter<PlaylistItem?, bool>(current =>
+                    Converter = new FuncValueConverter<Track?, bool>(current =>
                         current is not null && item.Id == current.Id
                     ),
                 },
@@ -86,7 +83,7 @@ public sealed class PlaylistView(PlaylistViewModel vm, PlaylistState playlistSta
     private void OnRowDoubleTapped(object? sender, TappedEventArgs e)
     {
         var row = (DataGridRow)sender!;
-        var item = (PlaylistItem)row.DataContext!;
+        var item = (Track)row.DataContext!;
         if (vm.PlayCommand.CanExecute(item))
         {
             vm.PlayCommand.Execute(item);

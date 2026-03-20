@@ -18,8 +18,8 @@ public sealed partial class MainMenuViewModel(IPlaylistService playlistService, 
         {
             return;
         }
-        var item = playlistService.AddItem(path);
-        playlistService.SetCurrentItem(item);
+        var item = playlistService.AddTrack(path);
+        playlistService.SetCurrentTrack(item);
         playlistService.Play();
     }
 
@@ -33,7 +33,7 @@ public sealed partial class MainMenuViewModel(IPlaylistService playlistService, 
         }
         foreach (var path in paths)
         {
-            playlistService.AddItem(path);
+            playlistService.AddTrack(path);
         }
     }
 
@@ -53,7 +53,7 @@ public sealed partial class MainMenuViewModel(IPlaylistService playlistService, 
     [RelayCommand]
     private void NewPlaylist()
     {
-        playlistService.SetCurrentItem(null);
+        playlistService.SetCurrentTrack(null);
         playlistService.Stop();
         playlistService.Clear();
     }

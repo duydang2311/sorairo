@@ -6,8 +6,8 @@ namespace Sorairo.Common.Interfaces;
 
 public interface IPlaylistService : IDisposable
 {
-    PlaylistItem AddItem(Uri path);
-    void SetCurrentItem(PlaylistItem? item);
+    Track AddTrack(Uri path);
+    void SetCurrentTrack(Track? item);
     void SkipNext();
     void SkipPrevious();
     OneOf<PlaylistError, AudioError, Success> Play();

@@ -96,7 +96,7 @@ public sealed class NowPlayingView(
                     .BindResource(BackgroundProperty, "SurfaceSubtleBrush"),
                 new ContentControl().Bind(
                     FluentBinding
-                        .Bind(playlistState, a => a.CurrentItem, ContentProperty)
+                        .Bind(playlistState, a => a.CurrentTrack, ContentProperty)
                         .Mode(BindingMode.OneWay)
                         .Convert(item =>
                         {
@@ -114,7 +114,7 @@ public sealed class NowPlayingView(
 
     Bitmap? frontCoverImage;
 
-    private Border PlayingView(PlaylistItem item)
+    private Border PlayingView(Track item)
     {
         if (frontCoverImage is not null)
         {

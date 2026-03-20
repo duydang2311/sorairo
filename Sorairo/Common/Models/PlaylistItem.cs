@@ -2,7 +2,7 @@ using ATL;
 
 namespace Sorairo.Common.Models;
 
-public sealed record PlaylistItem
+public sealed record Track
 {
     public required Guid Id { get; init; }
     public required Uri Path { get; init; }
@@ -12,7 +12,7 @@ public sealed record PlaylistItem
 
     public byte[]? GetFrontCover()
     {
-        var track = new Track(Path.LocalPath);
+        var track = new ATL.Track(Path.LocalPath);
         return track
             .EmbeddedPictures.FirstOrDefault(a => a.PicType == PictureInfo.PIC_TYPE.Front)
             ?.PictureData;
