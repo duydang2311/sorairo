@@ -380,7 +380,7 @@ public sealed class NowPlayingView(
         static double GetDragValue(TrackProgressBar progressBar, PointerEventArgs e)
         {
             var position = e.GetPosition(progressBar);
-            var percent = Math.Min(Math.Max(0, position.X) / progressBar.Bounds.Width, 1);
+            var percent = Math.Clamp(position.X / progressBar.Bounds.Width, 0, 1);
             return percent * progressBar.Maximum;
         }
         return panel;

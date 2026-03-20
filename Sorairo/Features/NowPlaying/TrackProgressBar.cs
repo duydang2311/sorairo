@@ -84,11 +84,7 @@ public sealed class TrackProgressBar : Control
         {
             var range = Maximum - Minimum;
             var percent = Math.Clamp((Value - Minimum) / range, 0, 1);
-            using var state = context.PushTransform(Matrix.CreateScale(percent, 1.0));
-            using (context.PushTransform(Matrix.CreateScale(percent, 1.0)))
-            {
-                context.FillRectangle(_immutableBackground, Bounds);
-            }
+            context.FillRectangle(_immutableBackground, Bounds.WithWidth(percent * Bounds.Width));
         }
     }
 }
