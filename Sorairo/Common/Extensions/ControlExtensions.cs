@@ -107,4 +107,11 @@ public static class ControlExtensions
         fn(control);
         return control;
     }
+
+    public static T1 Do<T1, T2>(this T1 control, Action<T1, T2> fn, T2 arg2)
+        where T1 : Control
+    {
+        fn(control, arg2);
+        return control;
+    }
 }

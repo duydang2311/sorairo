@@ -1,17 +1,12 @@
 using Avalonia;
-using Avalonia.Animation;
 using Avalonia.Controls;
-using Avalonia.Controls.Primitives;
-using Avalonia.Controls.Templates;
 using Avalonia.Data;
-using Avalonia.Interactivity;
+using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Markup.Xaml.MarkupExtensions;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Styling;
-using Avalonia.Threading;
-using Avalonia.VisualTree;
 using R3;
 using Sorairo.Common.Helpers;
 using Sorairo.Common.Models;
@@ -39,8 +34,12 @@ public sealed class NowPlayingView(
                 {
                     Children =
                     {
-                        ElapsedSlider(),
-                        new Border { Padding = new Thickness(16, 0), Child = ElapsedTexts() },
+                        ElapsedProgressBar(),
+                        new Border
+                        {
+                            Padding = new Thickness(16, 4, 16, 0),
+                            Child = ElapsedTexts(),
+                        },
                         new Border
                         {
                             Padding = new Thickness(16, 8),
@@ -117,6 +116,11 @@ public sealed class NowPlayingView(
 
     private Border PlayingView(PlaylistItem item)
     {
+        if (frontCoverImage is not null)
+        {
+            frontCoverImage.Dispose();
+            frontCoverImage = null;
+        }
         var frontCover = item.GetFrontCover();
         if (frontCover is not null)
         {
@@ -470,51 +474,46 @@ public sealed class NowPlayingView(
         };
     }
 
-    private Slider ElapsedSlider()
+    private ProgressBar ElapsedProgressBar()
     {
-        var elapsedSlider = new Slider { Margin = new Thickness(0, -8, 0, 0), Minimum = 0 }
+        var progressBar = new ProgressBar { Margin = new Thickness(0, -8, 0, 0), Minimum = 0 }
             .Bind(
                 FluentBinding
-                    .OneWay(audioState, a => a.TotalTime, Slider.MaximumProperty)
+                    .OneWay(audioState, a => a.TotalTime, ProgressBar.MaximumProperty)
                     .Convert(a => Math.Max(1, a.TotalSeconds))
             )
-            .Bind(FluentBinding.OneWay(vm, a => a.ElapsedSeconds, Slider.ValueProperty));
-        // .Bind(
-        //     FluentBinding
-        //         .OneWay(vm, a => a.IsSeeking, Slider.TransitionsProperty)
-        //         .Convert(isSeeking =>
-        //         {
-        //             return null;
-        //             return isSeeking
-        //                 ? null
-        //                 : new Transitions
-        //                 {
-        //                     new DoubleTransition
-        //                     {
-        //                         Property = Slider.ValueProperty,
-        //                         Duration = TimeSpan.FromMilliseconds(250),
-        //                     },
-        //                 };
-        //         })
-        // );
-        elapsedSlider.AddHandler(
-            Slider.PointerPressedEvent,
-            (_, _) =>
+            .Bind(FluentBinding.OneWay(vm, a => a.ElapsedSeconds, ProgressBar.ValueProperty));
+        progressBar.PointerPressed += (sender, e) =>
+        {
+            var progressBar = (ProgressBar)sender!;
+            vm.IsSeeking = true;
+            progressBar.Value = GetDragValue(progressBar, e);
+        };
+        progressBar.PointerMoved += (sender, e) =>
+        {
+            if (vm.IsSeeking)
             {
-                vm.IsSeeking = true;
-            },
-            RoutingStrategies.Tunnel
-        );
-        elapsedSlider.AddHandler(
-            Slider.PointerReleasedEvent,
-            (_, _) =>
+                var progressBar = (ProgressBar)sender!;
+                progressBar.Value = GetDragValue(progressBar, e);
+            }
+        };
+        progressBar.PointerReleased += (sender, e) =>
+        {
+            if (vm.IsSeeking)
             {
-                vm.SeekCommand.Execute(elapsedSlider.Value);
+                var progressBar = (ProgressBar)sender!;
+                progressBar.Value = GetDragValue(progressBar, e);
+                vm.SeekCommand.Execute(progressBar.Value);
                 vm.IsSeeking = false;
-            },
-            RoutingStrategies.Tunnel
-        );
-        return elapsedSlider;
+            }
+        };
+        static double GetDragValue(ProgressBar progressBar, PointerEventArgs e)
+        {
+            var position = e.GetPosition(progressBar);
+            var percent = Math.Min(Math.Max(0, position.X) / progressBar.Bounds.Width, 1);
+            return percent * progressBar.Maximum;
+        }
+        return progressBar;
     }
 
     private Grid ElapsedTexts()
@@ -550,14 +549,17 @@ public sealed class NowPlayingView(
     {
         vm.Activate(ref disposables);
         disposables.Add(
-            Disposable.Create(() =>
-            {
-                if (frontCoverImage is not null)
+            Disposable.Create(
+                frontCoverImage,
+                static (frontCoverImage) =>
                 {
-                    frontCoverImage.Dispose();
-                    frontCoverImage = null;
+                    if (frontCoverImage is not null)
+                    {
+                        frontCoverImage.Dispose();
+                        frontCoverImage = null;
+                    }
                 }
-            })
+            )
         );
         playlistState
             .ObservePropertyChanged(state => state.RepeatMode)
