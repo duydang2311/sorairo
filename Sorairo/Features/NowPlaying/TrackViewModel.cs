@@ -44,7 +44,6 @@ public sealed partial class TrackViewModel(Track track) : ActivatableViewModel
                 this,
                 static state =>
                 {
-                    Console.WriteLine("Disposable run");
                     if (state.FrontCoverImage is not null)
                     {
                         state.FrontCoverImage.Dispose();

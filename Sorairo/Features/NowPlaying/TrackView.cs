@@ -1,3 +1,4 @@
+using Ardalis.GuardClauses;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Layout;
@@ -138,12 +139,14 @@ public sealed class TrackView(TrackViewModel vm) : ActivatableView
                         .Bind(
                             FluentBinding
                                 .OneWay(vm, vm => vm.Track, TextBlock.TextProperty)
-                                .Convert(track => track.Title)
+                                .Convert(track => Guard.Against.Null(track).Title)
                         )
                         .Bind(
                             FluentBinding
                                 .OneWay(vm, vm => vm.Track, IsVisibleProperty)
-                                .Convert(track => !string.IsNullOrEmpty(track.Title))
+                                .Convert(track =>
+                                    !string.IsNullOrEmpty(Guard.Against.Null(track).Title)
+                                )
                         ),
                     new TextBlock
                     {
@@ -155,7 +158,7 @@ public sealed class TrackView(TrackViewModel vm) : ActivatableView
                         .Bind(
                             FluentBinding
                                 .OneWay(vm, vm => vm.Track, TextBlock.TextProperty)
-                                .Convert(track => track.Artist)
+                                .Convert(track => Guard.Against.Null(track).Artist)
                         ),
                 },
             },
