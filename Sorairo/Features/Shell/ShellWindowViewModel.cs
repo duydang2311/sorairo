@@ -2,12 +2,13 @@ using System.ComponentModel;
 using Avalonia;
 using Avalonia.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
+using R3;
 using Sorairo.Common.Models;
 using Sorairo.Common.UI;
 
 namespace Sorairo.Features.Shell;
 
-public sealed partial class ShellWindowViewModel(AppState appState) : ViewModelBase, IDisposable
+public sealed partial class ShellWindowViewModel(AppState appState) : ActivatableViewModel
 {
     private static readonly double MACOS_TRAFFIC_LIGHTS_WIDTH = 72;
     private static readonly double WINDOWS_DECORATION_WIDTH = 0;
@@ -44,9 +45,21 @@ public sealed partial class ShellWindowViewModel(AppState appState) : ViewModelB
             _ => new Thickness(),
         };
 
-    protected override void Init()
+    protected override void Init() { }
+
+    protected override void OnActivated(ref DisposableBag disposables)
     {
+        var vm = this;
         appState.PropertyChanged += OnAppStatePropertyChanged;
+        disposables.Add(
+            Disposable.Create(
+                (vm, appState),
+                static (tuple) =>
+                {
+                    tuple.appState.PropertyChanged -= tuple.vm.OnAppStatePropertyChanged;
+                }
+            )
+        );
     }
 
     public PlaylistVisibility PlaylistVisibility =>
@@ -69,10 +82,5 @@ public sealed partial class ShellWindowViewModel(AppState appState) : ViewModelB
         {
             OnPropertyChanged(nameof(PlaylistVisibility));
         }
-    }
-
-    public void Dispose()
-    {
-        appState.PropertyChanged -= OnAppStatePropertyChanged;
     }
 }

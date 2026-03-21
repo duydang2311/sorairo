@@ -24,7 +24,7 @@ public sealed class ShellWindow(
     NowPlayingView nowPlayingView,
     TitleBarView titleBarView,
     FrameProviderContext frameProviderContext
-) : InitWindowBase
+) : ActivatableWindow
 {
     protected override void Init()
     {
@@ -54,11 +54,15 @@ public sealed class ShellWindow(
         Content = CreateContent();
     }
 
+    protected override void OnActivated(ref DisposableBag disposables)
+    {
+        vm.Activate(ref disposables);
+    }
+
     protected override void OnClosed(EventArgs e)
     {
-        base.OnClosed(e);
-        vm.Dispose();
         frameProviderContext.FrameProvider.Dispose();
+        base.OnClosed(e);
     }
 
     private Border CreateContent()
