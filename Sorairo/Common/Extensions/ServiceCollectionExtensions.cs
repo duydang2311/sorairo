@@ -1,7 +1,6 @@
 using Sorairo.Common.Interfaces;
 using Sorairo.Common.Models;
 using Sorairo.Common.Services;
-using Sorairo.Features.MainMenu;
 using Sorairo.Features.NowPlaying;
 using Sorairo.Features.Playlist;
 using Sorairo.Features.Shell;

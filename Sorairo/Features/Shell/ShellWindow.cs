@@ -13,7 +13,6 @@ using R3.Avalonia;
 using Sorairo.Common.Helpers;
 using Sorairo.Common.Models;
 using Sorairo.Common.UI;
-using Sorairo.Features.MainMenu;
 using Sorairo.Features.NowPlaying;
 using Sorairo.Features.Playlist;
 using Sorairo.Features.TitleBar;
@@ -68,12 +67,6 @@ public sealed class ShellWindow(
     private Border CreateContent()
     {
         var mainContentControl = new ContentControl();
-        this.Style(
-            new Style(a => a.OfType<MainMenuView>())
-            {
-                Setters = { new Setter(VerticalAlignmentProperty, VerticalAlignment.Center) },
-            }
-        );
         return new Border
         {
             Child = new DockPanel()
