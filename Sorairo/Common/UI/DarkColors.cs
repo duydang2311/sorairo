@@ -9,10 +9,10 @@ public static class DarkColors
     public static readonly Color SurfaceEmph = Color.Parse("#2a2a2b");
     public static readonly Color SurfaceBorder = Color.Parse("#2f2f30");
 
-    public static readonly Color Fg = Color.Parse("#ffffff");
-    public static readonly Color FgSubtle = Color.Parse("#c2c2c2");
+    public static readonly Color Fg = Color.Parse("#dfdfdf");
+    public static readonly Color FgSubtle = Color.Parse("#cccccc");
     public static readonly Color FgEmph = Color.Parse("#ffffff");
-    public static readonly Color FgMuted = Color.Parse("#aaaaaa");
+    public static readonly Color FgMuted = Color.Parse("#888888");
 
     public static readonly Color Base = Color.Parse("#2e2f30");
     public static readonly Color BaseSubtle = Color.Parse("#323436");
