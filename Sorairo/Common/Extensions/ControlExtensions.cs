@@ -1,4 +1,6 @@
+using Avalonia.Controls.Chrome;
 using Avalonia.Data;
+using Avalonia.Input;
 using Avalonia.Markup.Xaml.MarkupExtensions;
 using Avalonia.Styling;
 using Sorairo.Common.Helpers;
@@ -73,17 +75,18 @@ public static class ControlExtensions
         where TControl : Control
     {
         // need v12
-        // var compiled = CompiledBinding.Create(
-        //     binding.GetExpression(),
-        //     mode: binding.GetMode(),
-        //     source: binding.GetSource(),
-        //     converter: binding.GetConverter()
-        // );
-        control[!binding.GetProperty()] = new Binding(binding.GetPath(), binding.GetMode())
-        {
-            Source = binding.GetSource(),
-            Converter = binding.GetConverter(),
-        };
+        var compiled = CompiledBinding.Create(
+            binding.GetExpression(),
+            mode: binding.GetMode(),
+            source: binding.GetSource(),
+            converter: binding.GetConverter()
+        );
+        control[!binding.GetProperty()] = compiled;
+        // control[!binding.GetProperty()] = new Binding(binding.GetPath(), binding.GetMode())
+        // {
+        //     Source = binding.GetSource(),
+        //     Converter = binding.GetConverter(),
+        // };
         return control;
     }
 
@@ -108,10 +111,17 @@ public static class ControlExtensions
         return control;
     }
 
-    public static T1 Do<T1, T2>(this T1 control, Action<T1, T2> fn, T2 arg2)
+    public static T1 Do<T1, T2>(this T1 control, T2 arg2, Action<T1, T2> fn)
         where T1 : Control
     {
         fn(control, arg2);
+        return control;
+    }
+
+    public static T SetElementRole<T>(this T control, WindowDecorationsElementRole role)
+        where T : Control
+    {
+        WindowDecorationProperties.SetElementRole(control, role);
         return control;
     }
 }

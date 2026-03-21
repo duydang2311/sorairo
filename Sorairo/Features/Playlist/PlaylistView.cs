@@ -57,14 +57,15 @@ public sealed class PlaylistView(PlaylistViewModel vm, PlaylistState playlistSta
                 new DataGridTextColumn
                 {
                     Header = "Title",
-                    Binding = new Binding(nameof(Track.Title), BindingMode.OneWay),
+                    Binding = new Binding(nameof(Track.Title)) { Mode = BindingMode.OneWay },
                     Width = new DataGridLength(1, DataGridLengthUnitType.Star),
                 },
                 new DataGridTextColumn
                 {
                     Header = "File",
-                    Binding = new Binding(nameof(Track.Path), BindingMode.OneWay)
+                    Binding = new Binding(nameof(Track.Path))
                     {
+                        Mode = BindingMode.OneWay,
                         Converter = new FuncValueConverter<Uri, string>(a =>
                             Path.GetFileName(Guard.Against.Null(a).LocalPath)
                         ),
@@ -83,9 +84,10 @@ public sealed class PlaylistView(PlaylistViewModel vm, PlaylistState playlistSta
                 e.Row,
                 e.Row.BindClass(
                     "active",
-                    new Binding(nameof(PlaylistState.CurrentTrack), BindingMode.OneWay)
+                    new Binding(nameof(PlaylistState.CurrentTrack))
                     {
                         Source = playlistState,
+                        Mode = BindingMode.OneWay,
                         Converter = new FuncValueConverter<Track?, bool>(current =>
                             current is not null && item.Id == current.Id
                         ),

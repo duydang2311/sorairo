@@ -1,11 +1,14 @@
 using Ardalis.GuardClauses;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Chrome;
 using Avalonia.Data;
+using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Styling;
 using Microsoft.Extensions.DependencyInjection;
+using R3;
 using R3.Avalonia;
 using Sorairo.Common.Helpers;
 using Sorairo.Common.Models;
@@ -13,15 +16,16 @@ using Sorairo.Common.UI;
 using Sorairo.Features.MainMenu;
 using Sorairo.Features.NowPlaying;
 using Sorairo.Features.Playlist;
+using Sorairo.Features.TitleBar;
 
 namespace Sorairo.Features.Shell;
 
 public sealed class ShellWindow(
-    MainMenuView mainMenuView,
+    ShellWindowViewModel vm,
     IServiceProvider serviceProvider,
     AppState appState,
     NowPlayingView nowPlayingView,
-    ShellWindowViewModel vm,
+    TitleBarView titleBarView,
     FrameProviderContext frameProviderContext
 ) : InitWindowBase
 {
@@ -49,6 +53,8 @@ public sealed class ShellWindow(
         Width = 960;
         Height = 720;
         ExtendClientAreaToDecorationsHint = true;
+        WindowDecorations = WindowDecorations.BorderOnly;
+        RequestedThemeVariant = ThemeVariant.Dark;
         Content = CreateContent();
     }
 
@@ -78,26 +84,11 @@ public sealed class ShellWindow(
                     {
                         Height = 31,
                         BorderThickness = new Thickness(0, 0, 0, 1),
-                        Child = new Grid
-                        {
-                            ColumnDefinitions = new ColumnDefinitions("Auto,*"),
-                            Children =
-                            {
-                                new TextBlock
-                                {
-                                    Text = "Sorairo",
-                                    VerticalAlignment = VerticalAlignment.Center,
-                                    Margin = new Thickness(0, 0, 16, 0),
-                                    FontWeight = FontWeight.Bold,
-                                }
-                                    .BindResource(ForegroundProperty, "PrimaryFgBrush")
-                                    .GridColumn(0),
-                                mainMenuView.GridColumn(1),
-                            },
-                        },
+                        Child = titleBarView,
                     }
                         .Dock(Dock.Top)
                         .BindResource(BorderBrushProperty, "SurfaceBorderBrush")
+                        .BindResource(BackgroundProperty, "SurfaceBrush")
                         .Bind(FluentBinding.OneWay(vm, vm => vm.WindowPadding, PaddingProperty))
                         .Bind(
                             FluentBinding
@@ -106,7 +97,14 @@ public sealed class ShellWindow(
                                 {
                                     return 31 - thickness.Top;
                                 })
-                        ),
+                        )
+                        .Do(border =>
+                        {
+                            WindowDecorationProperties.SetElementRole(
+                                border,
+                                WindowDecorationsElementRole.TitleBar
+                            );
+                        }),
                     new Grid
                     {
                         ColumnDefinitions = new ColumnDefinitions("*,*,*,*"),
@@ -188,9 +186,6 @@ public sealed class ShellWindow(
                     },
                 },
             },
-        }.WithBind(
-            PaddingProperty,
-            new Binding(nameof(OffScreenMargin), BindingMode.OneWay) { Source = this }
-        );
+        }.Bind(FluentBinding.OneWay(this, window => window.OffScreenMargin, PaddingProperty));
     }
 }

@@ -6,6 +6,7 @@ using Sorairo.Features.NowPlaying;
 using Sorairo.Features.Playlist;
 using Sorairo.Features.Shell;
 using Sorairo.Features.StatusBar;
+using Sorairo.Features.TitleBar;
 
 #pragma warning disable IDE0130 // Namespace does not match folder structure
 namespace Microsoft.Extensions.DependencyInjection;
@@ -32,10 +33,10 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    public static IServiceCollection AddMainMenu(this IServiceCollection services)
+    public static IServiceCollection AddTitleBar(this IServiceCollection services)
     {
-        services.AddTransient<MainMenuViewModel>();
-        services.AddTransient<MainMenuView>();
+        services.AddTransient<TitleBarViewModel>();
+        services.AddTransient<TitleBarView>();
         return services;
     }
 

@@ -99,6 +99,9 @@
                         Color="{x:Static ui:LightColors.PrimarySubtle}" />
                     <SolidColorBrush x:Key="PrimaryEmphBrush"
                         Color="{x:Static ui:LightColors.PrimaryEmph}" />
+
+                    <SolidColorBrush x:Key="ChromeCloseBrush"
+                        Color="{x:Static ui:LightColors.ChromeClose}" />
                 </ResourceDictionary>
                 <ResourceDictionary x:Key="Dark">
                     <SolidColorBrush x:Key="SurfaceBrush" Color="{x:Static ui:DarkColors.Surface}" />
@@ -124,11 +127,15 @@
                         Color="{x:Static ui:DarkColors.BaseBorder}" />
 
                     <SolidColorBrush x:Key="PrimaryBrush" Color="{x:Static ui:DarkColors.Primary}" />
-                    <SolidColorBrush x:Key="PrimaryFgBrush" Color="{x:Static ui:DarkColors.PrimaryFg}" />
+                    <SolidColorBrush x:Key="PrimaryFgBrush"
+                        Color="{x:Static ui:DarkColors.PrimaryFg}" />
                     <SolidColorBrush x:Key="PrimarySubtleBrush"
                         Color="{x:Static ui:DarkColors.PrimarySubtle}" />
                     <SolidColorBrush x:Key="PrimaryEmphBrush"
                         Color="{x:Static ui:DarkColors.PrimaryEmph}" />
+
+                    <SolidColorBrush x:Key="ChromeCloseBrush"
+                        Color="{x:Static ui:DarkColors.ChromeClose}" />
                 </ResourceDictionary>
             </ResourceDictionary.ThemeDictionaries>
 

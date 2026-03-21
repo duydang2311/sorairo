@@ -16,12 +16,12 @@ public partial class App : Application
 
     public override void OnFrameworkInitializationCompleted()
     {
-        BindingPlugins.DataValidators.RemoveAt(0);
+        // BindingPlugins.DataValidators.RemoveAt(0);
 
         var serviceProvider = new ServiceCollection()
             .AddCommon()
             .AddMainWindow()
-            .AddMainMenu()
+            .AddTitleBar()
             .AddPlaylist()
             .AddStatusBar()
             .AddNowPlaying()
