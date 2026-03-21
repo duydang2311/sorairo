@@ -36,18 +36,19 @@ public sealed class TitleBarView(TitleBarViewModel vm, AppState appState) : Acti
                 {
                     Text = "Sorairo",
                     VerticalAlignment = VerticalAlignment.Center,
-                    Margin = new Thickness(0, 0, 16, 0),
                     FontWeight = FontWeight.Bold,
                 }
-                    .BindResource(ForegroundProperty, "PrimaryFgBrush")
-                    .GridColumn(0),
+                    .GridColumn(0)
+                    .BindResource(ForegroundProperty, "PrimaryFgBrush"),
                 new Menu
                 {
+                    Margin = new Thickness(8, 0, 0, 0),
                     Items =
                     {
                         new MenuItem
                         {
                             Header = "_File",
+                            CornerRadius = new CornerRadius(),
                             Items =
                             {
                                 new MenuItem
