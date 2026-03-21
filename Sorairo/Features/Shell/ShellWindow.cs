@@ -4,9 +4,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.Chrome;
 using Avalonia.Data;
 using Avalonia.Input;
-using Avalonia.Layout;
 using Avalonia.Media;
-using Avalonia.Styling;
 using Microsoft.Extensions.DependencyInjection;
 using R3;
 using R3.Avalonia;
@@ -53,7 +51,6 @@ public sealed class ShellWindow(
         Height = 720;
         ExtendClientAreaToDecorationsHint = true;
         WindowDecorations = WindowDecorations.BorderOnly;
-        RequestedThemeVariant = ThemeVariant.Dark;
         Content = CreateContent();
     }
 
