@@ -29,7 +29,7 @@ public sealed class TrackView(TrackViewModel vm) : ActivatableView
             Padding = new Thickness(16),
             Child = new Grid
             {
-                RowDefinitions = new RowDefinitions("*,Auto,Auto,Auto"),
+                RowDefinitions = new RowDefinitions("*,Auto,Auto"),
                 VerticalAlignment = VerticalAlignment.Center,
                 Children =
                 {
@@ -121,20 +121,12 @@ public sealed class TrackView(TrackViewModel vm) : ActivatableView
                     },
                     new TextBlock
                     {
-                        Text = "Now Playing",
                         Margin = new Thickness(0, 8, 0, 0),
-                        FontSize = 10,
-                    }
-                        .GridRow(1)
-                        .BindResource(ForegroundProperty, "FgMutedBrush"),
-                    new TextBlock
-                    {
-                        Margin = new Thickness(0, 4, 0, 0),
                         FontSize = 18,
                         FontWeight = FontWeight.Medium,
                         TextWrapping = TextWrapping.WrapWithOverflow,
                     }
-                        .GridRow(2)
+                        .GridRow(1)
                         .BindResource(ForegroundProperty, "FgEmphBrush")
                         .Bind(
                             FluentBinding
@@ -153,7 +145,7 @@ public sealed class TrackView(TrackViewModel vm) : ActivatableView
                         Margin = new Thickness(0, 4, 0, 0),
                         FontWeight = FontWeight.SemiBold,
                     }
-                        .GridRow(3)
+                        .GridRow(2)
                         .BindResource(ForegroundProperty, "PrimaryFgBrush")
                         .Bind(
                             FluentBinding

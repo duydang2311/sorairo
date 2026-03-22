@@ -51,31 +51,41 @@ public sealed class PlaylistView(PlaylistViewModel vm, PlaylistState playlistSta
                 new DataGridTextColumn
                 {
                     Header = "Artist",
-                    Binding = new Binding(nameof(Track.Artist)) { Mode = BindingMode.OneWay },
+                    Binding = CompiledBinding.Create<Track, string?>(
+                        track => track.Artist,
+                        null,
+                        mode: BindingMode.OneWay
+                    ),
                     Width = new DataGridLength(1, DataGridLengthUnitType.Star),
                 },
                 new DataGridTextColumn
                 {
                     Header = "Title",
-                    Binding = new Binding(nameof(Track.Title)) { Mode = BindingMode.OneWay },
+                    Binding = CompiledBinding.Create<Track, string?>(
+                        track => track.Title,
+                        null,
+                        mode: BindingMode.OneWay
+                    ),
                     Width = new DataGridLength(1, DataGridLengthUnitType.Star),
                 },
                 new DataGridTextColumn
                 {
                     Header = "File",
-                    Binding = new Binding(nameof(Track.Path))
-                    {
-                        Mode = BindingMode.OneWay,
-                        Converter = new FuncValueConverter<Uri, string>(a =>
+                    Binding = CompiledBinding.Create<Track, Uri>(
+                        track => track.Path,
+                        null,
+                        mode: BindingMode.OneWay,
+                        converter: new FuncValueConverter<Uri, string>(a =>
                             Path.GetFileName(Guard.Against.Null(a).LocalPath)
-                        ),
-                    },
+                        )
+                    ),
                     Width = new DataGridLength(1, DataGridLengthUnitType.Star),
                 },
             },
         }
             .Bind(FluentBinding.OneWay(vm, vm => vm.Tracks, DataGrid.ItemsSourceProperty))
-            .BindResource(DataGrid.VerticalGridLinesBrushProperty, "SurfaceBorderBrush");
+            .BindResource(DataGrid.VerticalGridLinesBrushProperty, "SurfaceBorderBrush")
+            .BindResource(BackgroundProperty, "SurfaceBrush");
         dataGrid.LoadingRow += (_, e) =>
         {
             var item = (Track)e.Row.DataContext!;

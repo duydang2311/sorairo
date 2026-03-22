@@ -61,6 +61,16 @@ public static class ControlExtensions
         return control;
     }
 
+    public static BindingExpressionBase BindResourceManaged<T>(
+        this T control,
+        AvaloniaProperty property,
+        object key
+    )
+        where T : Control
+    {
+        return control.Bind(property, new DynamicResourceExtension(key));
+    }
+
     public static T WithBind<T>(this T control, AvaloniaProperty property, Binding binding)
         where T : Control
     {
@@ -88,6 +98,23 @@ public static class ControlExtensions
         //     Converter = binding.GetConverter(),
         // };
         return control;
+    }
+
+    public static BindingExpressionBase BindManaged<TControl, TSource, TValue>(
+        this TControl control,
+        FluentBinding<TSource, TValue> binding
+    )
+        where TControl : Control
+    {
+        return control.Bind(
+            binding.GetProperty(),
+            CompiledBinding.Create(
+                binding.GetExpression(),
+                mode: binding.GetMode(),
+                source: binding.GetSource(),
+                converter: binding.GetConverter()
+            )
+        );
     }
 
     public static T Class<T>(this T control, params IEnumerable<string> classes)

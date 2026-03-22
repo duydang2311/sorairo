@@ -67,7 +67,46 @@ public sealed class ShellWindow(
 
     private Border CreateContent()
     {
-        var mainContentControl = new ContentControl();
+        var mainContentControl = new ContentControl { }
+            .Bind(
+                FluentBinding
+                    .OneWay(appState, a => a.MainView, IsHitTestVisibleProperty)
+                    .Convert(view => view == AppMainView.Playlist)
+            )
+            .Bind(
+                FluentBinding
+                    .OneWay(appState, a => a.MainView, ContentProperty)
+                    .Convert(view =>
+                        view switch
+                        {
+                            AppMainView.Playlist =>
+                                serviceProvider.GetRequiredService<PlaylistView>(),
+                            _ => null,
+                        }
+                    )
+            )
+            .Bind(
+                FluentBinding
+                    .OneWay(vm, a => a.PlaylistVisibility, Grid.ColumnProperty)
+                    .Convert(visibility =>
+                        visibility switch
+                        {
+                            PlaylistVisibility.VisibleAsPanel => 2,
+                            _ => 1,
+                        }
+                    )
+            )
+            .Bind(
+                FluentBinding
+                    .OneWay(vm, a => a.PlaylistVisibility, Grid.ColumnSpanProperty)
+                    .Convert(visibility =>
+                        visibility switch
+                        {
+                            PlaylistVisibility.VisibleAsPanel => 2,
+                            _ => 3,
+                        }
+                    )
+            );
         return new Border
         {
             Child = new DockPanel()
@@ -131,51 +170,7 @@ public sealed class ShellWindow(
                                 )
                                 .GridColumn(0)
                                 .SpanColumn(4),
-                            mainContentControl
-                                .BindResource(BackgroundProperty, "SurfaceBrush")
-                                .Bind(
-                                    FluentBinding
-                                        .OneWay(appState, a => a.MainView, IsVisibleProperty)
-                                        .Convert(view => view == AppMainView.Playlist)
-                                )
-                                .Bind(
-                                    FluentBinding
-                                        .OneWay(appState, a => a.MainView, ContentProperty)
-                                        .Convert(view =>
-                                            view switch
-                                            {
-                                                AppMainView.Playlist =>
-                                                    serviceProvider.GetRequiredService<PlaylistView>(),
-                                                _ => null,
-                                            }
-                                        )
-                                )
-                                .Bind(
-                                    FluentBinding
-                                        .OneWay(vm, a => a.PlaylistVisibility, Grid.ColumnProperty)
-                                        .Convert(visibility =>
-                                            visibility switch
-                                            {
-                                                PlaylistVisibility.VisibleAsPanel => 2,
-                                                _ => 1,
-                                            }
-                                        )
-                                )
-                                .Bind(
-                                    FluentBinding
-                                        .OneWay(
-                                            vm,
-                                            a => a.PlaylistVisibility,
-                                            Grid.ColumnSpanProperty
-                                        )
-                                        .Convert(visibility =>
-                                            visibility switch
-                                            {
-                                                PlaylistVisibility.VisibleAsPanel => 2,
-                                                _ => 3,
-                                            }
-                                        )
-                                ),
+                            mainContentControl,
                         },
                     },
                 },
