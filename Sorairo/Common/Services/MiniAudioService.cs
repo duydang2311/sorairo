@@ -133,7 +133,7 @@ public sealed class MiniAudioService : IAudioService
         audioState.Status = AudioPlaybackStatus.Playing;
         audioState.TotalTime = GetTotalTime();
         audioState.ElapsedTime = GetElapsedTime();
-        _ = StartTrackingElapsedSecondsAsync();
+        Task.Run(StartTrackingElapsedSecondsAsync);
         return new Success();
     }
 
@@ -169,21 +169,21 @@ public sealed class MiniAudioService : IAudioService
         }
         cts = new CancellationTokenSource();
         var ct = cts.Token;
-        using var timer = new PeriodicTimer(TimeSpan.FromMilliseconds(200));
+        using var timer = new PeriodicTimer(TimeSpan.FromMilliseconds(33));
         try
         {
-            var state = (object)(this, audioState);
-            while (await timer.WaitForNextTickAsync(ct))
+            while (await timer.WaitForNextTickAsync(ct).ConfigureAwait(false))
             {
                 if (audioState.Status != AudioPlaybackStatus.Playing)
                 {
                     continue;
                 }
+                var state = (object)(audioState, GetElapsedTime());
                 Dispatcher.UIThread.Post(
                     static (state) =>
                     {
-                        var (audioService, audioState) = ((MiniAudioService, AudioState))state!;
-                        audioState.ElapsedTime = audioService.GetElapsedTime();
+                        var (audioState, elapsedTime) = ((AudioState, TimeSpan))state!;
+                        audioState.ElapsedTime = elapsedTime;
                     },
                     state,
                     DispatcherPriority.Render
