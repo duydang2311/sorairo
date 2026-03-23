@@ -223,6 +223,7 @@ public sealed class TitleBarView(TitleBarViewModel vm, AppState appState) : Acti
             },
         }.Do(grid =>
         {
+            WindowDecorationProperties.SetElementRole(grid, WindowDecorationsElementRole.TitleBar);
             AutomationProperties.SetIsControlElementOverride(grid, true);
             AutomationProperties.SetAutomationId(grid, "AvaloniaTitleBar");
             AutomationProperties.SetName(grid, "TitleBar");

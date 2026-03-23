@@ -10,7 +10,7 @@ namespace Sorairo.Features.Shell;
 
 public sealed partial class ShellWindowViewModel(AppState appState) : ActivatableViewModel
 {
-    private static readonly double MACOS_TRAFFIC_LIGHTS_WIDTH = 72;
+    private static readonly double MACOS_TRAFFIC_LIGHTS_WIDTH = 0; // 72
     private static readonly double WINDOWS_DECORATION_WIDTH = 0;
 
     [ObservableProperty]
