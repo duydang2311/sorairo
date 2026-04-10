@@ -11,26 +11,25 @@
 
   <ItemGroup>
     <PackageReference Include="Ardalis.GuardClauses" Version="5.0.0" />
-    <PackageReference Include="Avalonia" Version="12.0.0-rc1" />
-    <PackageReference Include="Avalonia.Controls.DataGrid" Version="12.0.0-rc1" />
-    <PackageReference Include="Avalonia.Desktop" Version="12.0.0-rc1" />
-    <PackageReference Include="Avalonia.Themes.Fluent" Version="12.0.0-rc1" />
-    <PackageReference Include="Avalonia.Fonts.Inter" Version="12.0.0-rc1" />
+    <PackageReference Include="Avalonia" Version="12.0.0" />
+    <PackageReference Include="Avalonia.Controls.DataGrid" Version="12.0.0" />
+    <PackageReference Include="Avalonia.Desktop" Version="12.0.0" />
+    <PackageReference Include="Avalonia.Fonts.Inter" Version="12.0.0" />
     <!--Condition
     below is needed to remove Avalonia.Diagnostics package from build output in Release
     configuration.-->
-    <PackageReference Include="AvaloniaUI.DiagnosticsSupport" Version="2.2.0-beta3">
+    <PackageReference Include="AvaloniaUI.DiagnosticsSupport" Version="2.2.0">
       <IncludeAssets Condition="'$(Configuration)' != 'Debug'">None</IncludeAssets>
       <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="Avalonia.Themes.Simple" Version="12.0.0-rc1" />
-    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
-    <PackageReference Include="JAJ.Packages.MiniAudioEx" Version="3.1.1" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.3" />
+    <PackageReference Include="Avalonia.Themes.Simple" Version="12.0.0" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+    <PackageReference Include="JAJ.Packages.MiniAudioEx" Version="3.2.1" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.5" />
     <PackageReference Include="ObservableCollections" Version="3.3.4" />
     <PackageReference Include="OneOf" Version="3.0.271" />
     <PackageReference Include="R3" Version="1.3.0" />
     <PackageReference Include="R3Extensions.Avalonia" Version="1.3.0" />
-    <PackageReference Include="z440.atl.core" Version="7.11.0" />
+    <PackageReference Include="z440.atl.core" Version="7.12.0" />
   </ItemGroup>
 </Project>
